@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Utama Pentadbir - e-Usrah PTSS</title>
+    <!-- FontAwesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-gold: #d4af37;
+            --dark-gold: #aa7c11;
+            --emerald-green: #059669;
+            --bg-dark: #0b1329;
+            --card-glass: rgba(15, 23, 42, 0.75);
+            --border-glass: rgba(212, 175, 55, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(rgba(11, 19, 41, 0.92), rgba(6, 78, 59, 0.88)),
+                        url('https://images.unsplash.com/photo-1542816417-0983cbe82752?q=80&w=1920&auto=format&fit=crop') no-repeat center center/cover;
+            background-attachment: fixed;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Latar Belakang Geometri */
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(rgba(212, 175, 55, 0.12) 1.5px, transparent 0);
+            background-size: 30px 30px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* HEADER */
+        header {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 8%;
+            background: rgba(11, 19, 41, 0.7);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-glass);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold));
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 22px;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+        }
+
+        .logo-text h2 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .logo-text p {
+            font-size: 11px;
+            color: var(--primary-gold);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .btn-logout {
+            padding: 10px 18px;
+            background: rgba(239, 68, 68, 0.15);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-logout:hover {
+            background: rgba(239, 68, 68, 0.3);
+            color: #fff;
+        }
+
+        /* KANDUNGAN UTAMA */
+        .container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* KAD LIVE MASA, HARI & TARIKH */
+        .clock-card {
+            background: var(--card-glass);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 25px 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .clock-info h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .clock-info p {
+            font-size: 12px;
+            color: #cbd5e1;
+            margin-top: 2px;
+        }
+
+        .live-display {
+            text-align: right;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px 24px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .live-time {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-gold);
+            letter-spacing: 1px;
+            font-family: monospace;
+        }
+
+        .live-date {
+            font-size: 12px;
+            color: #cbd5e1;
+            margin-top: 4px;
+        }
+
+        /* GRID MENU UTAMA */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
+        }
+
+        .menu-card {
+            background: var(--card-glass);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 30px 25px;
+            text-align: center;
+            text-decoration: none;
+            color: #ffffff;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+
+        .menu-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--primary-gold);
+            box-shadow: 0 20px 40px rgba(212, 175, 55, 0.25);
+            background: rgba(15, 23, 42, 0.85);
+        }
+
+        .menu-icon {
+            width: 65px;
+            height: 65px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.05));
+            border: 1px solid var(--border-glass);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            color: var(--primary-gold);
+            transition: all 0.3s ease;
+        }
+
+        .menu-card:hover .menu-icon {
+            background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold));
+            color: #0b1329;
+            transform: scale(1.1);
+        }
+
+        .menu-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .menu-card p {
+            font-size: 11px;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+
+        .arrow-badge {
+            margin-top: 5px;
+            font-size: 11px;
+            color: var(--primary-gold);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 11px;
+            color: #64748b;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 40px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 600px) {
+            .clock-card {
+                flex-direction: column;
+                text-align: center;
+            }
+            .live-display {
+                text-align: center;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-pattern"></div>
+
+    <!-- HEADER NAVIGATION -->
+    <header>
+        <div class="logo-area">
+            <div class="logo-icon">
+                <i class="fa-solid fa-user-gear"></i>
+            </div>
+            <div class="logo-text">
+                <h2>e-USRAH PTSS</h2>
+                <p>Portal Pentadbir Pusat Islam</p>
+            </div>
+        </div>
+
+        <a href="login-admin.html" class="btn-logout">
+            <i class="fa-solid fa-right-from-bracket"></i> Log Keluar
+        </a>
+    </header>
+
+    <!-- KANDUNGAN UTAMA -->
+    <div class="container">
+
+        <!-- KAD JAM LIVE, HARI & TARIKH -->
+        <div class="clock-card">
+            <div class="clock-info">
+                <h1>Panel Utama Admin</h1>
+                <p>Selamat datang! Sila pilih menu pengurusan di bawah.</p>
+            </div>
+            <div class="live-display">
+                <div class="live-time" id="liveTime">00:00:00 AM</div>
+                <div class="live-date" id="liveDate">Memuatkan tarikh...</div>
+            </div>
+        </div>
+
+        <!-- MAIN MENU GRID (BUTTONS LEAD TO NEW PAGES) -->
+        <div class="menu-grid">
+            
+            <!-- Menu 1: Urus Masa Usrah -->
+            <a href="urus-masa.html" class="menu-card">
+                <div class="menu-icon">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+                <h3>Urus Masa Usrah</h3>
+                <p>Tetapkan masa, hari, dan lokasi perjumpaan usrah mingguan.</p>
+                <div class="arrow-badge">
+                    Buka Halaman <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <!-- Menu 2: Senarai Naqib -->
+            <a href="senarai-naqib.html" class="menu-card">
+                <div class="menu-icon">
+                    <i class="fa-solid fa-user-tie"></i>
+                </div>
+                <h3>Senarai Naqib</h3>
+                <p>Pengurusan data Naqib/Naqibah dan kumpulan halaqah.</p>
+                <div class="arrow-badge">
+                    Buka Halaman <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <!-- Menu 3: Senarai Pelajar -->
+            <a href="senarai-pelajar.html" class="menu-card">
+                <div class="menu-icon">
+                    <i class="fa-solid fa-user-graduate"></i>
+                </div>
+                <h3>Senarai Pelajar</h3>
+                <p>Pangkalan data ahli usrah dan rekod peratusan kehadiran.</p>
+                <div class="arrow-badge">
+                    Buka Halaman <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <!-- Menu 4: Statistik Usrah -->
+            <a href="statistik-usrah.html" class="menu-card">
+                <div class="menu-icon">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <h3>Statistik Usrah</h3>
+                <p>Laporan peratusan kehadiran dan analisis pencapaian bulanan.</p>
+                <div class="arrow-badge">
+                    Buka Halaman <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        &copy; <span id="year"></span> Politeknik Tuanku Syed Sirajuddin (PTSS) | Hak Cipta Terpelihara.
+    </footer>
+
+    <!-- JAVASCRIPT FOR LIVE CLOCK & DATE -->
+    <script>
+        function updateLiveClock() {
+            const now = new Date();
+
+            // Format Jam (12-Jam AM/PM)
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            let seconds = now.getSeconds();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            
+            hours = hours % 12 || 12;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+
+            document.getElementById('liveTime').textContent = `${hours}:${minutes}:${seconds} ${ampm}`;
+
+            // Format Hari dan Tarikh (Bahasa Melayu)
+            const dateOptions = { 
+                weekday: 'long', 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric' 
+            };
+            const formattedDate = now.toLocaleDateString('ms-MY', dateOptions);
+            document.getElementById('liveDate').textContent = formattedDate;
+
+            // Tahun untuk Footer
+            document.getElementById('year').textContent = now.getFullYear();
+        }
+
+        // Kemas kini jam setiap 1 saat
+        setInterval(updateLiveClock, 1000);
+        updateLiveClock();
+    </script>
+</body>
+</html>
