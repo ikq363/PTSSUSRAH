@@ -293,7 +293,7 @@
 
         .modal-close:hover { color: var(--danger-color); }
 
-        /* PAPARAN KAD MAKLUMAT TERATUR (INFO GRID) */
+        /* GRID MAKLUMAT */
         .info-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -322,7 +322,7 @@
             color: var(--primary-gold);
         }
 
-        /* SUSUNAN KEHADIRAN KIRI vs KANAN */
+        /* SUSUNAN KEHADIRAN */
         .attendance-split-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -374,7 +374,7 @@
             font-size: 11px;
         }
 
-        /* SENARAI PELAJAR TABEL MODEN */
+        /* JADUAL PELAJAR */
         .student-table {
             width: 100%;
             border-collapse: collapse;
@@ -400,12 +400,33 @@
 
         .student-row:hover { background: rgba(212, 175, 55, 0.1); }
 
-        /* BUTTON STYLES */
-        .btn-approve { background: #059669; color: #fff; padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; }
-        .btn-reject { background: #ef4444; color: #fff; padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; }
+        /* BUTANG STYLES */
+        .btn-approve { 
+            background: #059669; 
+            color: #fff; 
+            padding: 6px 12px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .btn-approve:hover { background: #047857; }
+
+        .btn-reject { 
+            background: #ef4444; 
+            color: #fff; 
+            padding: 6px 12px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .btn-reject:hover { background: #dc2626; }
+
         .btn-print { background: var(--primary-gold); color: #0b1329; padding: 8px 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
         
-        /* BUTANG DELETE KERAS */
         .btn-delete {
             background: rgba(239, 68, 68, 0.2);
             color: var(--danger-color);
@@ -455,12 +476,12 @@
         </div>
 
         <div class="header-actions">
-            <!-- LIVE MASA, TARIKH & HARI -->
+            <!-- MASA & TARIKH LIVE -->
             <div class="live-datetime-box">
                 <div class="live-time" id="liveClock"><i class="fa-regular fa-clock"></i> 00:00:00</div>
                 <div class="live-date">
-                    <div id="liveDay" style="font-weight: 600; color: #fff;">Isnin</div>
-                    <div id="liveDate">1 Jan 2026</div>
+                    <div id="liveDay" style="font-weight: 600; color: #fff;">-</div>
+                    <div id="liveDate">-</div>
                 </div>
             </div>
 
@@ -472,7 +493,7 @@
 
     <div class="container">
 
-        <!-- APPROVAL CARD -->
+        <!-- KAD PENGESAHAN (APPROVAL) -->
         <div class="approval-card" onclick="openModal('modalApproval')">
             <div style="display:flex; align-items:center; gap:15px;">
                 <i class="fa-solid fa-user-clock" style="font-size:28px; color:var(--primary-gold);"></i>
@@ -484,12 +505,12 @@
             <i class="fa-solid fa-chevron-right" style="color: var(--primary-gold);"></i>
         </div>
 
-        <!-- NAVIGATION TAB: NAQIB vs NAQIBAH -->
+        <!-- TAB NAQIB / NAQIBAH -->
         <div class="tab-navigation">
-            <button class="tab-btn active" onclick="switchGenderTab('naqib')">
+            <button class="tab-btn active" id="btnTabNaqib">
                 <i class="fa-solid fa-user-tie"></i> Senarai Naqib (Lelaki)
             </button>
-            <button class="tab-btn" onclick="switchGenderTab('naqibah')">
+            <button class="tab-btn" id="btnTabNaqibah">
                 <i class="fa-solid fa-user-nurse"></i> Senarai Naqibah (Perempuan)
             </button>
         </div>
@@ -501,7 +522,7 @@
 
     </div>
 
-    <!-- MODAL 1: APPROVAL -->
+    <!-- MODAL 1: KELULUSAN (APPROVAL) -->
     <div class="modal-overlay" id="modalApproval">
         <div class="modal-container">
             <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modalApproval')"></i>
@@ -516,12 +537,14 @@
                         <th>Tindakan</th>
                     </tr>
                 </thead>
-                <tbody id="approvalTableBody"></tbody>
+                <tbody id="approvalTableBody">
+                    <tr><td colspan="5" style="text-align:center; color:#94a3b8;">Memuatkan senarai kelulusan...</td></tr>
+                </tbody>
             </table>
         </div>
     </div>
 
-    <!-- MODAL 2: MAKLUMAT NAQIB / NAQIBAH -->
+    <!-- MODAL 2: PROFIL NAQIB / NAQIBAH -->
     <div class="modal-overlay" id="modalNaqib">
         <div class="modal-container">
             <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modalNaqib')"></i>
@@ -534,7 +557,7 @@
                 </div>
             </div>
 
-            <!-- GRID MAKLUMAT TERATUR NAQIB -->
+            <!-- GRID MAKLUMAT -->
             <div class="info-grid">
                 <div class="info-box">
                     <span>Nama Naqib/Naqibah</span>
@@ -573,14 +596,13 @@
         </div>
     </div>
 
-    <!-- MODAL 3: MAKLUMAT PELAJAR & KEHADIRAN (KIRI / KANAN) -->
+    <!-- MODAL 3: PROFIL & KEHADIRAN PELAJAR -->
     <div class="modal-overlay" id="modalStudent">
         <div class="modal-container">
             <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modalStudent')"></i>
             
             <h3 style="color: var(--primary-gold); margin-bottom:20px;"><i class="fa-solid fa-user-graduate"></i> Profil Pelajar & Rekod Kehadiran</h3>
 
-            <!-- GRID MAKLUMAT TERATUR PELAJAR -->
             <div class="info-grid">
                 <div class="info-box">
                     <span>Nama Pelajar</span>
@@ -600,11 +622,9 @@
                 </div>
             </div>
 
-            <!-- PAPARAN KEHADIRAN: KIRI (HADIR) VS KANAN (TAK HADIR) -->
             <h4 style="color:var(--primary-gold); margin-top:15px;"><i class="fa-solid fa-calendar-days"></i> Analisis Kehadiran Usrah</h4>
             
             <div class="attendance-split-container">
-                <!-- KOLOM KIRI: HADIR -->
                 <div class="attendance-column col-hadir">
                     <div class="column-header">
                         <span><i class="fa-solid fa-circle-check"></i> SENARAI HADIR</span>
@@ -613,7 +633,6 @@
                     <div id="listHadir"></div>
                 </div>
 
-                <!-- KOLOM KANAN: TAK HADIR -->
                 <div class="attendance-column col-takhadir">
                     <div class="column-header">
                         <span><i class="fa-solid fa-circle-xmark"></i> SENARAI TAK HADIR</span>
@@ -627,20 +646,18 @@
     </div>
 
     <footer>
-        &copy; 2026 Politeknik Tuanku Syed Sirajuddin (PTSS) | Hak Cipta Terpelihara.
+        &copy; Politeknik Tuanku Syed Sirajuddin (PTSS) | Hak Cipta Terpelihara.
     </footer>
 
-    <!-- SCRIPT FOR LIVE CLOCK, DATE & DAY -->
+    <!-- SKRIP MASA REAL-TIME -->
     <script>
         function updateLiveDateTime() {
             const now = new Date();
-            
             let hours = now.getHours();
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const seconds = String(now.getSeconds()).padStart(2, '0');
             const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12; 
+            hours = hours % 12 || 12; 
             const timeStr = `${String(hours).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
 
             const days = ['Ahad', 'Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu'];
@@ -658,20 +675,21 @@
         updateLiveDateTime();
     </script>
 
-    <!-- FIREBASE SDK & JAVASCRIPT -->
+    <!-- FIREBASE SDK v10 (FIRESTORE) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { 
-            getFirestore, collection, query, where, getDocs, doc, deleteDoc 
+            getFirestore, collection, query, where, getDocs, doc, deleteDoc, updateDoc, onSnapshot 
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        // ⚠️ SILA MASUKKAN KUNCI CONFIG FIREBASE SEBENAR ANDA DI SINI
         const firebaseConfig = {
-            apiKey: "PASTE_API_KEY_ANDA_DI_SINI",
-            authDomain: "projek-anda.firebaseapp.com",
-            projectId: "projek-anda",
-            storageBucket: "projek-anda.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abcdef123456"
+            apiKey: "AIzaSyYOUR_ACTUAL_API_KEY",
+            authDomain: "your-project-id.firebaseapp.com",
+            projectId: "your-project-id",
+            storageBucket: "your-project-id.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:abcdef123456"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -680,64 +698,139 @@
         let currentTab = 'naqib';
         let activeNaqibId = null;
 
-        window.switchGenderTab = function(gender) {
+        window.openModal = id => document.getElementById(id).classList.add('active');
+        window.closeModal = id => document.getElementById(id).classList.remove('active');
+
+        document.getElementById('btnTabNaqib').addEventListener('click', (e) => switchGenderTab('naqib', e.currentTarget));
+        document.getElementById('btnTabNaqibah').addEventListener('click', (e) => switchGenderTab('naqibah', e.currentTarget));
+
+        function switchGenderTab(gender, targetBtn) {
             currentTab = gender;
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+            targetBtn.classList.add('active');
             loadApprovedGallery();
         }
 
+        /* 1. KELULUSAN (APPROVAL REALTIME) */
+        function listenPendingUsers() {
+            const q = query(collection(db, "users"), where("status", "==", "pending"));
+
+            onSnapshot(q, (snapshot) => {
+                const pendingCountElem = document.getElementById('pendingCount');
+                const approvalTableBody = document.getElementById('approvalTableBody');
+
+                pendingCountElem.textContent = snapshot.size;
+                approvalTableBody.innerHTML = "";
+
+                if (snapshot.empty) {
+                    approvalTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8;">Tiada permohonan baharu menantikan kelulusan.</td></tr>`;
+                    return;
+                }
+
+                snapshot.forEach((docSnap) => {
+                    const user = docSnap.data();
+                    const userId = docSnap.id;
+
+                    const tr = document.createElement('tr');
+                    tr.className = "student-row";
+                    tr.innerHTML = `
+                        <td><strong>${user.nama || '-'}</strong></td>
+                        <td><span class="role-tag" style="margin:0;">${(user.role || '').toUpperCase()}</span></td>
+                        <td>${user.jabatan || '-'}</td>
+                        <td>${user.kelas || '-'}</td>
+                        <td class="action-cell">
+                            <button class="btn-approve btn-app-act"><i class="fa-solid fa-check"></i> Lulus</button>
+                            <button class="btn-reject btn-rej-act"><i class="fa-solid fa-xmark"></i> Tolak</button>
+                        </td>
+                    `;
+
+                    tr.querySelector('.btn-app-act').addEventListener('click', () => approveUser(userId, user.nama));
+                    tr.querySelector('.btn-rej-act').addEventListener('click', () => rejectUser(userId, user.nama));
+
+                    approvalTableBody.appendChild(tr);
+                });
+            }, (error) => {
+                console.error("Firestore error:", error);
+            });
+        }
+
+        async function approveUser(userId, nama) {
+            if (!confirm(`Adakah anda pasti ingin meluluskan ${nama}?`)) return;
+            try {
+                await updateDoc(doc(db, "users", userId), { status: "approved" });
+                alert(`Pendaftaran ${nama} BERJAYA DILULUSKAN!`);
+                loadApprovedGallery();
+            } catch (error) {
+                alert("Gagal meluluskan: " + error.message);
+            }
+        }
+
+        async function rejectUser(userId, nama) {
+            if (!confirm(`Adakah anda pasti ingin menolak ${nama}?`)) return;
+            try {
+                await updateDoc(doc(db, "users", userId), { status: "rejected" });
+                alert(`Permohonan ${nama} telah DITOLAK.`);
+            } catch (error) {
+                alert("Gagal menolak: " + error.message);
+            }
+        }
+
+        /* 2. GALERI NAQIB / NAQIBAH LULUS */
         async function loadApprovedGallery() {
             const galleryGrid = document.getElementById('galleryGrid');
             galleryGrid.innerHTML = `<p style="color:#94a3b8;">Memuatkan data...</p>`;
 
-            const q = query(
-                collection(db, "users"), 
-                where("role", "==", currentTab), 
-                where("status", "==", "approved")
-            );
-            
-            const querySnapshot = await getDocs(q);
-            galleryGrid.innerHTML = "";
+            try {
+                const q = query(
+                    collection(db, "users"), 
+                    where("role", "==", currentTab), 
+                    where("status", "==", "approved")
+                );
+                
+                const querySnapshot = await getDocs(q);
+                galleryGrid.innerHTML = "";
 
-            if(querySnapshot.empty) {
-                galleryGrid.innerHTML = `<p style="color:#94a3b8;">Tiada pendaftaran bagi ${currentTab.toUpperCase()} lagi.</p>`;
-                return;
-            }
+                if(querySnapshot.empty) {
+                    galleryGrid.innerHTML = `<p style="color:#94a3b8;">Tiada rekod ${currentTab.toUpperCase()} yang diluluskan.</p>`;
+                    return;
+                }
 
-            for (const docSnap of querySnapshot.docs) {
-                const data = docSnap.data();
-                const naqibId = docSnap.id;
+                for (const docSnap of querySnapshot.docs) {
+                    const data = docSnap.data();
+                    const naqibId = docSnap.id;
 
-                const studentQuery = query(collection(db, "students"), where("naqibId", "==", naqibId));
-                const studentSnap = await getDocs(studentQuery);
+                    const studentQuery = query(collection(db, "students"), where("naqibId", "==", naqibId));
+                    const studentSnap = await getDocs(studentQuery);
 
-                const card = document.createElement('div');
-                card.className = "naqib-card";
-                card.innerHTML = `
-                    <div class="naqib-avatar">
-                        <i class="fa-solid ${currentTab === 'naqibah' ? 'fa-user-nurse' : 'fa-user'}"></i>
-                    </div>
-                    <h3>${data.nama}</h3>
-                    <span class="role-tag">${data.jabatan} - ${data.kelas}</span>
-                    <div style="font-size:12px; color:#cbd5e1; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
-                        <i class="fa-solid fa-user-graduate"></i> <strong>${studentSnap.size}</strong> Pelajar
-                    </div>
-                `;
-                card.addEventListener('click', () => openNaqibModal(data, naqibId));
-                galleryGrid.appendChild(card);
+                    const card = document.createElement('div');
+                    card.className = "naqib-card";
+                    card.innerHTML = `
+                        <div class="naqib-avatar">
+                            <i class="fa-solid ${currentTab === 'naqibah' ? 'fa-user-nurse' : 'fa-user'}"></i>
+                        </div>
+                        <h3>${data.nama}</h3>
+                        <span class="role-tag">${data.jabatan || '-'} - ${data.kelas || '-'}</span>
+                        <div style="font-size:12px; color:#cbd5e1; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
+                            <i class="fa-solid fa-user-graduate"></i> <strong>${studentSnap.size}</strong> Pelajar
+                        </div>
+                    `;
+                    card.addEventListener('click', () => openNaqibModal(data, naqibId));
+                    galleryGrid.appendChild(card);
+                }
+            } catch (error) {
+                console.error("Ralat memuatkan galeri:", error);
+                galleryGrid.innerHTML = `<p style="color:#ef4444;">Sila semak semula sambungan atau konfigurasi Firebase Anda.</p>`;
             }
         }
 
         async function openNaqibModal(data, naqibId) {
             activeNaqibId = naqibId;
-            document.getElementById('naqibName').textContent = data.nama;
-            document.getElementById('naqibRole').textContent = data.role.toUpperCase();
-            document.getElementById('naqibDept').textContent = data.jabatan;
-            document.getElementById('naqibClass').textContent = data.kelas;
+            document.getElementById('naqibName').textContent = data.nama || '-';
+            document.getElementById('naqibRole').textContent = (data.role || '-').toUpperCase();
+            document.getElementById('naqibDept').textContent = data.jabatan || '-';
+            document.getElementById('naqibClass').textContent = data.kelas || '-';
             document.getElementById('naqibSession').textContent = data.sesi || '2026/2027';
 
-            // Tetapkan event handler untuk butang delete Naqib
             document.getElementById('btnDeleteNaqib').onclick = () => deleteNaqib(naqibId, data.nama);
 
             loadStudentsUnderNaqib(naqibId);
@@ -752,7 +845,7 @@
             studentTable.innerHTML = "";
 
             if(studentSnap.empty) {
-                studentTable.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">Tiada pelajar berdaftar di bawah Naqib ini.</td></tr>`;
+                studentTable.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">Tiada pelajar di bawah kawalan Naqib ini.</td></tr>`;
                 return;
             }
 
@@ -763,22 +856,20 @@
                 const tr = document.createElement('tr');
                 tr.className = "student-row";
                 tr.innerHTML = `
-                    <td><strong>${st.nama}</strong></td>
-                    <td>${st.noMatrik}</td>
-                    <td>${st.kelas}</td>
+                    <td><strong>${st.nama || '-'}</strong></td>
+                    <td>${st.noMatrik || '-'}</td>
+                    <td>${st.kelas || '-'}</td>
                     <td class="action-cell">
                         <button class="btn-print btn-view" style="padding:4px 10px; font-size:11px;"><i class="fa-solid fa-eye"></i> Kehadiran</button>
                         <button class="btn-delete btn-del-st" style="padding:4px 8px; font-size:11px;"><i class="fa-solid fa-trash"></i> Padam</button>
                     </td>
                 `;
 
-                // Event listener untuk lihat kehadiran
                 tr.querySelector('.btn-view').addEventListener('click', (e) => {
                     e.stopPropagation();
                     openStudentModal(st, stId);
                 });
 
-                // Event listener untuk padam pelajar
                 tr.querySelector('.btn-del-st').addEventListener('click', (e) => {
                     e.stopPropagation();
                     deleteStudent(stId, st.nama, naqibId);
@@ -788,87 +879,88 @@
             });
         }
 
-        // FUNGSI PADAM NAQIB
+        /* 3. PADAM REKOD NAQIB & PELAJAR */
         async function deleteNaqib(naqibId, namaNaqib) {
-            const confirmDelete = confirm(`Adakah anda pasti untuk memadam ${namaNaqib}? Semua rekod naqib ini akan dipadam secara kekal.`);
-            if(!confirmDelete) return;
-
+            if(!confirm(`Adakah anda pasti untuk memadam ${namaNaqib}? Rekod ini akan dipadam secara kekal.`)) return;
             try {
                 await deleteDoc(doc(db, "users", naqibId));
-                alert(`Naqib/Naqibah ${namaNaqib} telah berjaya dipadam.`);
+                alert(`Rekod ${namaNaqib} telah berjaya dipadam.`);
                 window.closeModal('modalNaqib');
                 loadApprovedGallery();
             } catch (error) {
-                console.error("Ralat memadam Naqib:", error);
-                alert("Gagal memadam data Naqib.");
+                alert("Gagal memadam data.");
             }
         }
 
-        // FUNGSI PADAM PELAJAR
         async function deleteStudent(studentId, namaPelajar, naqibId) {
-            const confirmDelete = confirm(`Adakah anda pasti untuk memadam pelajar ${namaPelajar}?`);
-            if(!confirmDelete) return;
-
+            if(!confirm(`Adakah anda pasti untuk memadam pelajar ${namaPelajar}?`)) return;
             try {
                 await deleteDoc(doc(db, "students", studentId));
-                alert(`Pelajar ${namaPelajar} telah berjaya dipadam.`);
+                alert(`Pelajar ${namaPelajar} telah dipadam.`);
                 loadStudentsUnderNaqib(naqibId);
-                loadApprovedGallery(); // Kemas kini bilangan pelajar pada galeri
+                loadApprovedGallery();
             } catch (error) {
-                console.error("Ralat memadam Pelajar:", error);
-                alert("Gagal memadam data Pelajar.");
+                alert("Gagal memadam pelajar.");
             }
         }
 
+        /* 4. REKOD KEHADIRAN PELAJAR */
         async function openStudentModal(stData, studentId) {
-            document.getElementById('stName').textContent = stData.nama;
-            document.getElementById('stMatrik').textContent = stData.noMatrik;
-            document.getElementById('stDept').textContent = stData.jabatan;
-            document.getElementById('stClass').textContent = stData.kelas;
-
-            const attendQuery = query(collection(db, "attendances"), where("studentId", "==", studentId));
-            const attendSnap = await getDocs(attendQuery);
+            document.getElementById('stName').textContent = stData.nama || '-';
+            document.getElementById('stMatrik').textContent = stData.noMatrik || '-';
+            document.getElementById('stDept').textContent = stData.jabatan || '-';
+            document.getElementById('stClass').textContent = stData.kelas || '-';
 
             const listHadir = document.getElementById('listHadir');
             const listTakHadir = document.getElementById('listTakHadir');
 
-            listHadir.innerHTML = "";
-            listTakHadir.innerHTML = "";
+            listHadir.innerHTML = `<p style="font-size:11px; color:#64748b;">Memuatkan...</p>`;
+            listTakHadir.innerHTML = `<p style="font-size:11px; color:#64748b;">Memuatkan...</p>`;
 
-            let countH = 0;
-            let countTH = 0;
+            try {
+                const attendQuery = query(collection(db, "attendances"), where("studentId", "==", studentId));
+                const attendSnap = await getDocs(attendQuery);
 
-            attendSnap.forEach(docSnap => {
-                const att = docSnap.data();
-                const item = document.createElement('div');
-                item.className = "attendance-item";
-                item.innerHTML = `
-                    <strong>${att.sesiName}</strong>
-                    <span>Tarikh: ${att.tarikh}</span>
-                `;
+                listHadir.innerHTML = "";
+                listTakHadir.innerHTML = "";
 
-                if(att.status.toLowerCase() === 'hadir') {
-                    listHadir.appendChild(item);
-                    countH++;
-                } else {
-                    listTakHadir.appendChild(item);
-                    countTH++;
-                }
-            });
+                let countH = 0;
+                let countTH = 0;
 
-            if(countH === 0) listHadir.innerHTML = `<p style="font-size:11px; color:#64748b;">Tiada rekod hadir.</p>`;
-            if(countTH === 0) listTakHadir.innerHTML = `<p style="font-size:11px; color:#64748b;">Tiada rekod tak hadir.</p>`;
+                attendSnap.forEach(docSnap => {
+                    const att = docSnap.data();
+                    const item = document.createElement('div');
+                    item.className = "attendance-item";
+                    item.innerHTML = `
+                        <strong>${att.sesiName || 'Sesi Usrah'}</strong>
+                        <span>Tarikh: ${att.tarikh || '-'}</span>
+                    `;
 
-            document.getElementById('countHadir').textContent = countH;
-            document.getElementById('countTakHadir').textContent = countTH;
+                    if(att.status && att.status.toLowerCase() === 'hadir') {
+                        listHadir.appendChild(item);
+                        countH++;
+                    } else {
+                        listTakHadir.appendChild(item);
+                        countTH++;
+                    }
+                });
 
-            window.openModal('modalStudent');
+                if(countH === 0) listHadir.innerHTML = `<p style="font-size:11px; color:#64748b;">Tiada rekod hadir.</p>`;
+                if(countTH === 0) listTakHadir.innerHTML = `<p style="font-size:11px; color:#64748b;">Tiada rekod tak hadir.</p>`;
+
+                document.getElementById('countHadir').textContent = countH;
+                document.getElementById('countTakHadir').textContent = countTH;
+
+                window.openModal('modalStudent');
+            } catch (error) {
+                console.error("Ralat Kehadiran:", error);
+            }
         }
 
-        window.openModal = id => document.getElementById(id).classList.add('active');
-        window.closeModal = id => document.getElementById(id).classList.remove('active');
-
-        window.addEventListener('DOMContentLoaded', loadApprovedGallery);
+        window.addEventListener('DOMContentLoaded', () => {
+            listenPendingUsers();
+            loadApprovedGallery();
+        });
     </script>
 </body>
 </html>
