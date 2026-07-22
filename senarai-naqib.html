@@ -395,15 +395,42 @@
         }
 
         .student-row {
-            cursor: pointer;
             transition: background 0.2s;
         }
 
         .student-row:hover { background: rgba(212, 175, 55, 0.1); }
 
+        /* BUTTON STYLES */
         .btn-approve { background: #059669; color: #fff; padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; }
         .btn-reject { background: #ef4444; color: #fff; padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; }
         .btn-print { background: var(--primary-gold); color: #0b1329; padding: 8px 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
+        
+        /* BUTANG DELETE KERAS */
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-delete:hover {
+            background: var(--danger-color);
+            color: #ffffff;
+        }
+
+        .action-cell {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
 
         footer { text-align: center; padding: 20px; font-size: 11px; color: #64748b; margin-top: 40px; }
 
@@ -499,9 +526,12 @@
         <div class="modal-container">
             <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modalNaqib')"></i>
             
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
                 <h3 style="color: var(--primary-gold);"><i class="fa-solid fa-id-card"></i> Profil Lengkap</h3>
-                <button class="btn-print" onclick="window.print()"><i class="fa-solid fa-print"></i> Cetak</button>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-delete" id="btnDeleteNaqib"><i class="fa-solid fa-trash-can"></i> Padam Naqib Ini</button>
+                    <button class="btn-print" onclick="window.print()"><i class="fa-solid fa-print"></i> Cetak</button>
+                </div>
             </div>
 
             <!-- GRID MAKLUMAT TERATUR NAQIB -->
@@ -605,39 +635,34 @@
         function updateLiveDateTime() {
             const now = new Date();
             
-            // Format Jam (HH:MM:SS AM/PM)
             let hours = now.getHours();
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const seconds = String(now.getSeconds()).padStart(2, '0');
             const ampm = hours >= 12 ? 'PM' : 'AM';
             hours = hours % 12;
-            hours = hours ? hours : 12; // Jam 0 dijadikan 12
+            hours = hours ? hours : 12; 
             const timeStr = `${String(hours).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
 
-            // Nama Hari Bahasa Melayu
             const days = ['Ahad', 'Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu'];
             const dayStr = days[now.getDay()];
 
-            // Format Tarikh
             const months = ['Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun', 'Jul', 'Ogos', 'Sep', 'Okt', 'Nov', 'Dis'];
             const dateStr = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
 
-            // Kemas kini HTML
             document.getElementById('liveClock').innerHTML = `<i class="fa-regular fa-clock"></i> ${timeStr}`;
             document.getElementById('liveDay').textContent = dayStr;
             document.getElementById('liveDate').textContent = dateStr;
         }
 
-        // Jalankan fungsi setiap 1 saat (1000ms)
         setInterval(updateLiveDateTime, 1000);
-        updateLiveDateTime(); // Panggil sekali masa awal load
+        updateLiveDateTime();
     </script>
 
     <!-- FIREBASE SDK & JAVASCRIPT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { 
-            getFirestore, collection, query, where, getDocs, doc, updateDoc 
+            getFirestore, collection, query, where, getDocs, doc, deleteDoc 
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -653,6 +678,7 @@
         const db = getFirestore(app);
 
         let currentTab = 'naqib';
+        let activeNaqibId = null;
 
         window.switchGenderTab = function(gender) {
             currentTab = gender;
@@ -704,33 +730,94 @@
         }
 
         async function openNaqibModal(data, naqibId) {
+            activeNaqibId = naqibId;
             document.getElementById('naqibName').textContent = data.nama;
             document.getElementById('naqibRole').textContent = data.role.toUpperCase();
             document.getElementById('naqibDept').textContent = data.jabatan;
             document.getElementById('naqibClass').textContent = data.kelas;
             document.getElementById('naqibSession').textContent = data.sesi || '2026/2027';
 
+            // Tetapkan event handler untuk butang delete Naqib
+            document.getElementById('btnDeleteNaqib').onclick = () => deleteNaqib(naqibId, data.nama);
+
+            loadStudentsUnderNaqib(naqibId);
+            window.openModal('modalNaqib');
+        }
+
+        async function loadStudentsUnderNaqib(naqibId) {
             const studentQuery = query(collection(db, "students"), where("naqibId", "==", naqibId));
             const studentSnap = await getDocs(studentQuery);
             const studentTable = document.getElementById('studentListBody');
             
             studentTable.innerHTML = "";
 
+            if(studentSnap.empty) {
+                studentTable.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">Tiada pelajar berdaftar di bawah Naqib ini.</td></tr>`;
+                return;
+            }
+
             studentSnap.forEach(stDoc => {
                 const st = stDoc.data();
+                const stId = stDoc.id;
+
                 const tr = document.createElement('tr');
                 tr.className = "student-row";
                 tr.innerHTML = `
                     <td><strong>${st.nama}</strong></td>
                     <td>${st.noMatrik}</td>
                     <td>${st.kelas}</td>
-                    <td><button class="btn-print" style="padding:4px 10px; font-size:11px;">Lihat Kehadiran</button></td>
+                    <td class="action-cell">
+                        <button class="btn-print btn-view" style="padding:4px 10px; font-size:11px;"><i class="fa-solid fa-eye"></i> Kehadiran</button>
+                        <button class="btn-delete btn-del-st" style="padding:4px 8px; font-size:11px;"><i class="fa-solid fa-trash"></i> Padam</button>
+                    </td>
                 `;
-                tr.addEventListener('click', () => openStudentModal(st, stDoc.id));
+
+                // Event listener untuk lihat kehadiran
+                tr.querySelector('.btn-view').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openStudentModal(st, stId);
+                });
+
+                // Event listener untuk padam pelajar
+                tr.querySelector('.btn-del-st').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteStudent(stId, st.nama, naqibId);
+                });
+
                 studentTable.appendChild(tr);
             });
+        }
 
-            window.openModal('modalNaqib');
+        // FUNGSI PADAM NAQIB
+        async function deleteNaqib(naqibId, namaNaqib) {
+            const confirmDelete = confirm(`Adakah anda pasti untuk memadam ${namaNaqib}? Semua rekod naqib ini akan dipadam secara kekal.`);
+            if(!confirmDelete) return;
+
+            try {
+                await deleteDoc(doc(db, "users", naqibId));
+                alert(`Naqib/Naqibah ${namaNaqib} telah berjaya dipadam.`);
+                window.closeModal('modalNaqib');
+                loadApprovedGallery();
+            } catch (error) {
+                console.error("Ralat memadam Naqib:", error);
+                alert("Gagal memadam data Naqib.");
+            }
+        }
+
+        // FUNGSI PADAM PELAJAR
+        async function deleteStudent(studentId, namaPelajar, naqibId) {
+            const confirmDelete = confirm(`Adakah anda pasti untuk memadam pelajar ${namaPelajar}?`);
+            if(!confirmDelete) return;
+
+            try {
+                await deleteDoc(doc(db, "students", studentId));
+                alert(`Pelajar ${namaPelajar} telah berjaya dipadam.`);
+                loadStudentsUnderNaqib(naqibId);
+                loadApprovedGallery(); // Kemas kini bilangan pelajar pada galeri
+            } catch (error) {
+                console.error("Ralat memadam Pelajar:", error);
+                alert("Gagal memadam data Pelajar.");
+            }
         }
 
         async function openStudentModal(stData, studentId) {
