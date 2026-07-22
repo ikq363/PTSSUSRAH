@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Masuk / Daftar Naqib - e-Usrah PTSS</title>
+    <!-- FontAwesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-gold: #d4af37;
+            --dark-gold: #aa7c11;
+            --emerald-green: #059669;
+            --bg-dark: #0b1329;
+            --card-glass: rgba(15, 23, 42, 0.85);
+            --border-glass: rgba(212, 175, 55, 0.3);
+            --danger-color: #ef4444;
+            --success-color: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(rgba(11, 19, 41, 0.92), rgba(6, 78, 59, 0.88)),
+                        url('https://images.unsplash.com/photo-1542816417-0983cbe82752?q=80&w=1920&auto=format&fit=crop') no-repeat center center/cover;
+            background-attachment: fixed;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .bg-pattern {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(rgba(212, 175, 55, 0.12) 1.5px, transparent 0);
+            background-size: 30px 30px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* HEADER */
+        header {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 8%;
+            background: rgba(11, 19, 41, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-glass);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold));
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 22px;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+            color: #0b1329;
+        }
+
+        /* LIVE MASA & TARIKH BOX */
+        .live-datetime-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-glass);
+            padding: 8px 18px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .live-time {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary-gold);
+            letter-spacing: 1px;
+            font-family: monospace;
+        }
+
+        .live-date {
+            font-size: 11px;
+            color: #cbd5e1;
+            border-left: 1px solid rgba(255, 255, 255, 0.2);
+            padding-left: 12px;
+        }
+
+        /* MAIN CONTAINER */
+        .container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 480px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .auth-card {
+            background: var(--card-glass);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            padding: 35px 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        /* TOGGLE TAB SIGN IN / SIGN UP */
+        .auth-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            padding: 5px;
+            margin-bottom: 25px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border: none;
+            background: transparent;
+            color: #cbd5e1;
+            font-weight: 600;
+            font-size: 13px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold));
+            color: #0b1329;
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+        }
+
+        /* FORM STYLES */
+        .auth-form {
+            display: none;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .auth-form.active {
+            display: flex;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .input-group label {
+            font-size: 12px;
+            color: var(--primary-gold);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-box {
+            position: relative;
+        }
+
+        .input-box i {
+            position: absolute;
+            left: 14px; top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 14px 12px 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 13px;
+            outline: none;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-control:disabled {
+            background: rgba(255, 255, 255, 0.02);
+            color: #64748b;
+            cursor: not-allowed;
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        select.form-control {
+            cursor: pointer;
+        }
+
+        select.form-control option {
+            background: #0f172a;
+            color: #ffffff;
+        }
+
+        .btn-submit {
+            margin-top: 10px;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold));
+            color: #0b1329;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4);
+        }
+
+        footer { text-align: center; padding: 20px; font-size: 11px; color: #64748b; }
+    </style>
+</head>
+<body>
+
+    <div class="bg-pattern"></div>
+
+    <!-- HEADER -->
+    <header>
+        <div class="logo-area">
+            <div class="logo-icon"><i class="fa-solid fa-user-tie"></i></div>
+            <div>
+                <h2 style="font-size: 18px;">Portal Naqib & Naqibah</h2>
+                <p style="font-size: 11px; color: var(--primary-gold);">e-Usrah PTSS</p>
+            </div>
+        </div>
+
+        <!-- LIVE MASA, TARIKH & HARI -->
+        <div class="live-datetime-box">
+            <div class="live-time" id="liveClock"><i class="fa-regular fa-clock"></i> 00:00:00</div>
+            <div class="live-date">
+                <div id="liveDay" style="font-weight: 600; color: #fff;">Isnin</div>
+                <div id="liveDate">1 Jan 2026</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN LOGIN / SIGN UP CARD -->
+    <div class="container">
+        <div class="auth-card">
+            
+            <!-- TABS -->
+            <div class="auth-tabs">
+                <button class="tab-btn active" id="tabSignIn" onclick="switchAuthTab('signin')">
+                    <i class="fa-solid fa-right-to-bracket"></i> Sign In
+                </button>
+                <button class="tab-btn" id="tabSignUp" onclick="switchAuthTab('signup')">
+                    <i class="fa-solid fa-user-plus"></i> Sign Up
+                </button>
+            </div>
+
+            <!-- BORANG SIGN IN -->
+            <form id="formSignIn" class="auth-form active">
+                <div class="input-group">
+                    <label>Nama Penuh</label>
+                    <div class="input-box">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="loginNama" class="form-control" placeholder="CONTOH: MUHAMMAD AMIR" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>No. Matrik</label>
+                    <div class="input-box">
+                        <i class="fa-solid fa-id-card"></i>
+                        <input type="text" id="loginMatrik" class="form-control" placeholder="CONTOH: 18DDT23F1001" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i> Log Masuk
+                </button>
+            </form>
+
+            <!-- BORANG SIGN UP -->
+            <form id="formSignUp" class="auth-form">
+                <div class="input-group">
+                    <label>Nama Penuh</label>
+                    <div class="input-box">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="regNama" class="form-control" placeholder="CONTOH: AHMAD FAHMI" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>No. Matrik</label>
+                    <div class="input-box">
+                        <i class="fa-solid fa-id-card"></i>
+                        <input type="text" id="regMatrik" class="form-control" placeholder="CONTOH: 18DDT23F1002" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Jabatan</label>
+                    <div class="input-box">
+                        <i class="fa-solid fa-building"></i>
+                        <select id="regJabatan" class="form-control" required>
+                            <option value="">-- PILIH JABATAN --</option>
+                            <option value="JTMK">JTMK (Jabatan Teknologi Maklumat & Komunikasi)</option>
+                            <option value="JKE">JKE (Jabatan Kejuruteraan Elektrik)</option>
+                            <option value="JKM">JKM (Jabatan Kejuruteraan Mekanikal)</option>
+                            <option value="JP">JP (Jabatan Perdagangan)</option>
+                            <option value="JPH">JPH (Jabatan Pelancongan & Hospitaliti)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Kelas</label>
+                    <div class="input-box">
+                        <i class="fa-solid fa-users"></i>
+                        <input type="text" id="regKelas" class="form-control" placeholder="CONTOH: DHK5A" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Peranan / Jantina</label>
+                    <div class="input-box">
+                        <i class="fa-solid fa-venus-mars"></i>
+                        <select id="regRole" class="form-control" required>
+                            <option value="naqib">NAQIB (LELAKI)</option>
+                            <option value="naqibah">NAQIBAH (PEREMPUAN)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Sesi</label>
+                    <div class="input-box">
+                        <i class="fa-solid fa-calendar-days"></i>
+                        <input type="text" id="regSesi" class="form-control" value="SESI 1 2026/2027" disabled>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    <i class="fa-solid fa-paper-plane"></i> Hantar Pendaftaran
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2026 Politeknik Tuanku Syed Sirajuddin (PTSS) | Hak Cipta Terpelihara.
+    </footer>
+
+    <!-- LIVE CLOCK SCRIPT -->
+    <script>
+        function updateLiveDateTime() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            const timeStr = `${String(hours).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
+
+            const days = ['Ahad', 'Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu'];
+            const dayStr = days[now.getDay()];
+
+            const months = ['Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun', 'Jul', 'Ogos', 'Sep', 'Okt', 'Nov', 'Dis'];
+            const dateStr = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+
+            document.getElementById('liveClock').innerHTML = `<i class="fa-regular fa-clock"></i> ${timeStr}`;
+            document.getElementById('liveDay').textContent = dayStr;
+            document.getElementById('liveDate').textContent = dateStr;
+        }
+
+        setInterval(updateLiveDateTime, 1000);
+        updateLiveDateTime();
+
+        // TUKAR SEMUA INPUT KEPADA HURUF BESAR SECARA AUTOMATIK WAKTU TYPING
+        document.addEventListener('input', function(e) {
+            if (e.target.classList.contains('form-control') && e.target.tagName === 'INPUT') {
+                e.target.value = e.target.value.toUpperCase();
+            }
+        });
+    </script>
+
+    <!-- FIREBASE SDK & AUTH LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { 
+            getFirestore, collection, query, where, getDocs, addDoc 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "PASTE_API_KEY_ANDA_DI_SINI",
+            authDomain: "projek-anda.firebaseapp.com",
+            projectId: "projek-anda",
+            storageBucket: "projek-anda.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef123456"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // TUKAR TAB SIGN IN / SIGN UP
+        window.switchAuthTab = function(type) {
+            const tabSignIn = document.getElementById('tabSignIn');
+            const tabSignUp = document.getElementById('tabSignUp');
+            const formSignIn = document.getElementById('formSignIn');
+            const formSignUp = document.getElementById('formSignUp');
+
+            if(type === 'signin') {
+                tabSignIn.classList.add('active');
+                tabSignUp.classList.remove('active');
+                formSignIn.classList.add('active');
+                formSignUp.classList.remove('active');
+            } else {
+                tabSignUp.classList.add('active');
+                tabSignIn.classList.remove('active');
+                formSignUp.classList.add('active');
+                formSignIn.classList.remove('active');
+            }
+        };
+
+        // PROSES SIGN UP (PENDAFTARAN NAQIB BAHARU)
+        document.getElementById('formSignUp').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const nama = document.getElementById('regNama').value.trim().toUpperCase();
+            const noMatrik = document.getElementById('regMatrik').value.trim().toUpperCase();
+            const jabatan = document.getElementById('regJabatan').value;
+            const kelas = document.getElementById('regKelas').value.trim().toUpperCase();
+            const role = document.getElementById('regRole').value;
+            const sesi = "SESI 1 2026/2027";
+
+            try {
+                // Semak jika No Matrik sudah berdaftar
+                const q = query(collection(db, "users"), where("noMatrik", "==", noMatrik));
+                const checkSnap = await getDocs(q);
+
+                if (!checkSnap.empty) {
+                    alert("No. Matrik ini telah berdaftar dalam sistem!");
+                    return;
+                }
+
+                // Simpan maklumat ke Firestore dengan status PENDING
+                await addDoc(collection(db, "users"), {
+                    nama: nama,
+                    noMatrik: noMatrik,
+                    jabatan: jabatan,
+                    kelas: kelas,
+                    role: role,
+                    sesi: sesi,
+                    status: "pending", // Memerlukan kelulusan Admin
+                    createdAt: new Date().toISOString()
+                });
+
+                alert("Pendaftaran berjaya dihantar! Sila tunggu kelulusan daripada Admin sebelum anda boleh log masuk.");
+                document.getElementById('formSignUp').reset();
+                switchAuthTab('signin');
+
+            } catch (error) {
+                console.error("Ralat Pendaftaran:", error);
+                alert("Gagal membuat pendaftaran. Sila cuba lagi.");
+            }
+        });
+
+        // PROSES SIGN IN (LOG MASUK)
+        document.getElementById('formSignIn').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const nama = document.getElementById('loginNama').value.trim().toUpperCase();
+            const noMatrik = document.getElementById('loginMatrik').value.trim().toUpperCase();
+
+            try {
+                // Cari akaun berdasarkan No Matrik & Nama Penuh
+                const q = query(
+                    collection(db, "users"), 
+                    where("noMatrik", "==", noMatrik),
+                    where("nama", "==", nama)
+                );
+
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    alert("Akaun tidak dijumpai! Sila pastikan Nama Penuh dan No. Matrik adalah betul atau buat pendaftaran (Sign Up) terlebih dahulu.");
+                    return;
+                }
+
+                let userData = null;
+                let userId = null;
+
+                querySnapshot.forEach(docSnap => {
+                    userData = docSnap.data();
+                    userId = docSnap.id;
+                });
+
+                // SEMAK STATUS KELULUSAN ADMIN
+                if (userData.status === "pending") {
+                    alert("Akaun anda masih dalam proses pendaftaran dan BELUM DILULUSKAN oleh Admin. Sila tunggu sehingga kelulusan diberikan.");
+                    return;
+                } else if (userData.status === "rejected") {
+                    alert("Permohonan pendaftaran anda telah ditolak oleh Admin.");
+                    return;
+                } else if (userData.status === "approved") {
+                    // Simpan sesi log masuk dalam localStorage
+                    localStorage.setItem('naqibUser', JSON.stringify({
+                        id: userId,
+                        nama: userData.nama,
+                        noMatrik: userData.noMatrik,
+                        role: userData.role,
+                        jabatan: userData.jabatan,
+                        kelas: userData.kelas
+                    }));
+
+                    alert(`Selamat datang, ${userData.nama}!`);
+                    window.location.href = "dashboard-naqib.html";
+                }
+
+            } catch (error) {
+                console.error("Ralat Log Masuk:", error);
+                alert("Gagal untuk log masuk. Sila cuba lagi.");
+            }
+        });
+    </script>
+</body>
+</html>
