@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Masuk Pentadbir - e-Usrah PTSS</title>
+    <!-- FontAwesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-gold: #d4af37;
+            --dark-gold: #aa7c11;
+            --bg-dark: #0b1329;
+            --card-glass: rgba(15, 23, 42, 0.75);
+            --border-glass: rgba(212, 175, 55, 0.3);
+            --danger-color: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(rgba(11, 19, 41, 0.9), rgba(6, 78, 59, 0.85)),
+                        url('https://images.unsplash.com/photo-1542816417-0983cbe82752?q=80&w=1920&auto=format&fit=crop') no-repeat center center/cover;
+            background-attachment: fixed;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Corak Latar Geometri Islamik */
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(rgba(212, 175, 55, 0.12) 1.5px, transparent 0);
+            background-size: 30px 30px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Kad Log Masuk Admin 3D */
+        .login-box {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 420px;
+            background: var(--card-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            padding: 40px 30px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+            text-align: center;
+        }
+
+        /* Header Form */
+        .admin-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--primary-gold);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .login-box h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .login-box p {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-bottom: 30px;
+        }
+
+        /* Form Controls */
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            color: #cbd5e1;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 15px;
+            color: var(--primary-gold);
+            font-size: 16px;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 14px 15px 14px 45px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 13px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-wrapper input:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 12px rgba(212, 175, 55, 0.25);
+        }
+
+        /* Butang Mata (Toggle Password) */
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            left: auto !important;
+            cursor: pointer;
+            color: #94a3b8 !important;
+        }
+
+        .toggle-password:hover {
+            color: #fff !important;
+        }
+
+        /* Mesej Ralat */
+        .error-message {
+            display: none;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-bottom: 20px;
+        }
+
+        /* Butang Submit */
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary-gold) 0%, var(--dark-gold) 100%);
+            border: none;
+            border-radius: 12px;
+            color: #0b1329;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 18px rgba(212, 175, 55, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(212, 175, 55, 0.4);
+        }
+
+        /* Pautan Kembali */
+        .back-link {
+            display: inline-block;
+            margin-top: 25px;
+            color: #94a3b8;
+            font-size: 12px;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--primary-gold);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-pattern"></div>
+
+    <div class="login-box">
+        <span class="admin-badge"><i class="fa-solid fa-user-gear"></i> PORTAL PENTADBIR</span>
+        <h2>Log Masuk Admin</h2>
+        <p>Akses khas untuk Pengurusan Pusat Islam PTSS</p>
+
+        <!-- Mesej Ralat jika ID/Password Salah -->
+        <div class="error-message" id="error-box">
+            <i class="fa-solid fa-circle-exclamation"></i> ID atau Kata Laluan Salah!
+        </div>
+
+        <form id="adminLoginForm">
+            <!-- Fillbox ID -->
+            <div class="input-group">
+                <label for="admin-id">ID PENTADBIR</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-user-shield"></i>
+                    <input type="text" id="admin-id" placeholder="Masukkan ID Pentadbir" required autocomplete="off">
+                </div>
+            </div>
+
+            <!-- Fillbox Password -->
+            <div class="input-group">
+                <label for="admin-pass">KATA LALUAN</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="admin-pass" placeholder="Masukkan Kata Laluan" required>
+                    <i class="fa-solid fa-eye toggle-password" id="togglePass" onclick="togglePasswordVisibility()"></i>
+                </div>
+            </div>
+
+            <!-- Butang Log Masuk -->
+            <button type="submit" class="btn-submit">
+                <span>MASUK SISTEM</span>
+                <i class="fa-solid fa-right-to-bracket"></i>
+            </button>
+        </form>
+
+        <a href="index.html" class="back-link">
+            <i class="fa-solid fa-arrow-left"></i> Kembali ke Muka Utama
+        </a>
+    </div>
+
+    <script>
+        // Fungsi Lihat/Sembunyi Password
+        function togglePasswordVisibility() {
+            const passInput = document.getElementById('admin-pass');
+            const toggleIcon = document.getElementById('togglePass');
+            
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        // Pengesahan Log Masuk (Validation)
+        document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const inputID = document.getElementById('admin-id').value.trim();
+            const inputPass = document.getElementById('admin-pass').value.trim();
+            const errorBox = document.getElementById('error-box');
+
+            // ID & Password Khas yang Tetapkan:
+            const CORRECT_ID = "PUSATISLAMPTSS@2003";
+            const CORRECT_PASS = "PTSS@2003";
+
+            if (inputID === CORRECT_ID && inputPass === CORRECT_PASS) {
+                errorBox.style.display = "none";
+                alert("Log Masuk Berjaya! Mengalihkan ke Dashboard Admin...");
+                // Boleh tukar nama file ini mengikut muka dashboard admin anda nanti
+                window.location.href = "dashboard-admin.html"; 
+            } else {
+                errorBox.style.display = "block";
+            }
+        });
+    </script>
+</body>
+</html>
