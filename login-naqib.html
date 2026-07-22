@@ -312,7 +312,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-submit">
+                <button type="submit" class="btn-submit" id="btnSignInSubmit">
                     <i class="fa-solid fa-arrow-right-to-bracket"></i> Log Masuk
                 </button>
             </form>
@@ -377,7 +377,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-submit">
+                <button type="submit" class="btn-submit" id="btnSignUpSubmit">
                     <i class="fa-solid fa-paper-plane"></i> Hantar Pendaftaran
                 </button>
             </form>
@@ -415,7 +415,7 @@
         setInterval(updateLiveDateTime, 1000);
         updateLiveDateTime();
 
-        // TUKAR SEMUA INPUT KEPADA HURUF BESAR SECARA AUTOMATIK WAKTU TYPING
+        // PENUKAR AUTOMATIK HURUF BESAR UNTUK SEMUA INPUT
         document.addEventListener('input', function(e) {
             if (e.target.classList.contains('form-control') && e.target.tagName === 'INPUT') {
                 e.target.value = e.target.value.toUpperCase();
@@ -423,33 +423,35 @@
         });
     </script>
 
-    <!-- FIREBASE SDK & AUTH LOGIC -->
+    <!-- FIREBASE SDK v10 (FIRESTORE) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { 
             getFirestore, collection, query, where, getDocs, addDoc 
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        // 🔴 SILA SALIN & PASTE FIREBASE CONFIG ANDA DI SINI
         const firebaseConfig = {
-            apiKey: "PASTE_API_KEY_ANDA_DI_SINI",
-            authDomain: "projek-anda.firebaseapp.com",
-            projectId: "projek-anda",
-            storageBucket: "projek-anda.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abcdef123456"
+            apiKey: "AIzaSyYOUR_API_KEY_HERE",
+            authDomain: "your-project-id.firebaseapp.com",
+            projectId: "your-project-id",
+            storageBucket: "your-project-id.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef123456"
         };
 
+        // Inisialisasi Firebase & Firestore
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // TUKAR TAB SIGN IN / SIGN UP
+        // FUNGSI TUKAR TAB SIGN IN / SIGN UP
         window.switchAuthTab = function(type) {
             const tabSignIn = document.getElementById('tabSignIn');
             const tabSignUp = document.getElementById('tabSignUp');
             const formSignIn = document.getElementById('formSignIn');
             const formSignUp = document.getElementById('formSignUp');
 
-            if(type === 'signin') {
+            if (type === 'signin') {
                 tabSignIn.classList.add('active');
                 tabSignUp.classList.remove('active');
                 formSignIn.classList.add('active');
@@ -462,9 +464,13 @@
             }
         };
 
-        // PROSES SIGN UP (PENDAFTARAN NAQIB BAHARU)
+        // PROSES SIGN UP (FIRESTORE WRITE)
         document.getElementById('formSignUp').addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            const btnSubmit = document.getElementById('btnSignUpSubmit');
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Memproses...`;
 
             const nama = document.getElementById('regNama').value.trim().toUpperCase();
             const noMatrik = document.getElementById('regMatrik').value.trim().toUpperCase();
@@ -474,16 +480,18 @@
             const sesi = "SESI 1 2026/2027";
 
             try {
-                // Semak jika No Matrik sudah berdaftar
+                // 1. Semak jika No Matrik telah sedia berdaftar
                 const q = query(collection(db, "users"), where("noMatrik", "==", noMatrik));
                 const checkSnap = await getDocs(q);
 
                 if (!checkSnap.empty) {
                     alert("No. Matrik ini telah berdaftar dalam sistem!");
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Hantar Pendaftaran`;
                     return;
                 }
 
-                // Simpan maklumat ke Firestore dengan status PENDING
+                // 2. Simpan maklumat pendaftaran baharu dengan status 'pending'
                 await addDoc(collection(db, "users"), {
                     nama: nama,
                     noMatrik: noMatrik,
@@ -491,7 +499,7 @@
                     kelas: kelas,
                     role: role,
                     sesi: sesi,
-                    status: "pending", // Memerlukan kelulusan Admin
+                    status: "pending", // Memerlukan Kelulusan Admin
                     createdAt: new Date().toISOString()
                 });
 
@@ -500,20 +508,27 @@
                 switchAuthTab('signin');
 
             } catch (error) {
-                console.error("Ralat Pendaftaran:", error);
-                alert("Gagal membuat pendaftaran. Sila cuba lagi.");
+                console.error("Ralat Pendaftaran Firestore:", error);
+                alert("Gagal membuat pendaftaran: " + error.message);
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Hantar Pendaftaran`;
             }
         });
 
-        // PROSES SIGN IN (LOG MASUK)
+        // PROSES SIGN IN (FIRESTORE READ & APPROVAL CHECK)
         document.getElementById('formSignIn').addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            const btnSubmit = document.getElementById('btnSignInSubmit');
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Menyemak...`;
 
             const nama = document.getElementById('loginNama').value.trim().toUpperCase();
             const noMatrik = document.getElementById('loginMatrik').value.trim().toUpperCase();
 
             try {
-                // Cari akaun berdasarkan No Matrik & Nama Penuh
+                // Cari pengguna mengikut No Matrik dan Nama Penuh
                 const q = query(
                     collection(db, "users"), 
                     where("noMatrik", "==", noMatrik),
@@ -523,7 +538,9 @@
                 const querySnapshot = await getDocs(q);
 
                 if (querySnapshot.empty) {
-                    alert("Akaun tidak dijumpai! Sila pastikan Nama Penuh dan No. Matrik adalah betul atau buat pendaftaran (Sign Up) terlebih dahulu.");
+                    alert("Akaun tidak dijumpai! Sila pastikan Nama Penuh dan No. Matrik adalah betul atau daftar akaun baharu.");
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = `<i class="fa-solid fa-arrow-right-to-bracket"></i> Log Masuk`;
                     return;
                 }
 
@@ -537,13 +554,11 @@
 
                 // SEMAK STATUS KELULUSAN ADMIN
                 if (userData.status === "pending") {
-                    alert("Akaun anda masih dalam proses pendaftaran dan BELUM DILULUSKAN oleh Admin. Sila tunggu sehingga kelulusan diberikan.");
-                    return;
+                    alert("Akaun anda masih dalam proses pendaftaran dan BELUM DILULUSKAN oleh Admin.");
                 } else if (userData.status === "rejected") {
                     alert("Permohonan pendaftaran anda telah ditolak oleh Admin.");
-                    return;
                 } else if (userData.status === "approved") {
-                    // Simpan sesi log masuk dalam localStorage
+                    // Simpan maklumat sesi log masuk
                     localStorage.setItem('naqibUser', JSON.stringify({
                         id: userId,
                         nama: userData.nama,
@@ -554,12 +569,15 @@
                     }));
 
                     alert(`Selamat datang, ${userData.nama}!`);
-                    window.location.href = "dashboard-naqib.html";
+                    window.location.href = "dashboard-naqib.html"; // Bawa ke dashboard Naqib
                 }
 
             } catch (error) {
-                console.error("Ralat Log Masuk:", error);
-                alert("Gagal untuk log masuk. Sila cuba lagi.");
+                console.error("Ralat Log Masuk Firestore:", error);
+                alert("Gagal log masuk: " + error.message);
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = `<i class="fa-solid fa-arrow-right-to-bracket"></i> Log Masuk`;
             }
         });
     </script>
