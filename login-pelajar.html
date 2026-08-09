@@ -274,8 +274,8 @@
         <div class="live-datetime-box">
             <div class="live-time" id="liveClock"><i class="fa-regular fa-clock"></i> 00:00:00</div>
             <div class="live-date">
-                <div id="liveDay" style="font-weight: 600; color: #fff;">Isnin</div>
-                <div id="liveDate">1 Jan 2026</div>
+                <div id="liveDay" style="font-weight: 600; color: #fff;">Ahad</div>
+                <div id="liveDate">9 Ogo 2026</div>
             </div>
         </div>
     </header>
@@ -408,7 +408,6 @@
         setInterval(updateLiveDateTime, 1000);
         updateLiveDateTime();
 
-        // PENUKAR AUTOMATIK HURUF BESAR UNTUK SEMUA INPUT
         document.addEventListener('input', function(e) {
             if (e.target.classList.contains('form-control') && e.target.tagName === 'INPUT') {
                 e.target.value = e.target.value.toUpperCase();
@@ -416,28 +415,28 @@
         });
     </script>
 
-    <!-- FIREBASE SDK v10 (FIRESTORE) -->
+    <!-- FIREBASE SDK v10 (FIRESTORE - DIRECT WRITE & FAST) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { 
-            getFirestore, collection, query, where, getDocs, addDoc 
+            getFirestore, collection, addDoc, query, where, getDocs 
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // 🔴 MASUKKAN FIREBASE CONFIG ANDA DI SINI
+        // ✅ KONFIGURASI FIREBASE ANDA
         const firebaseConfig = {
-            apiKey: "AIzaSyYOUR_API_KEY_HERE",
-            authDomain: "your-project-id.firebaseapp.com",
-            projectId: "your-project-id",
-            storageBucket: "your-project-id.appspot.com",
-            messagingSenderId: "123456789012",
-            appId: "1:123456789012:web:abcdef123456"
+            apiKey: "AIzaSyDZWnQZou365jx6NtOFAWN_uNkZ3ppRvl0",
+            authDomain: "ptssusrah.firebaseapp.com",
+            projectId: "ptssusrah",
+            storageBucket: "ptssusrah.firebasestorage.app",
+            messagingSenderId: "859008504533",
+            appId: "1:859008504533:web:51d6ccdbf3b4e090aec85c",
+            measurementId: "G-D185J3E844"
         };
 
-        // Inisialisasi Firebase & Firestore
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // FUNGSI TUKAR TAB SIGN IN / SIGN UP
+        // TUKAR TAB SIGN IN / SIGN UP
         window.switchAuthTab = function(type) {
             const tabSignIn = document.getElementById('tabSignIn');
             const tabSignUp = document.getElementById('tabSignUp');
@@ -457,59 +456,47 @@
             }
         };
 
-        // PROSES SIGN UP PELAJAR
+        // PROSES SIGN UP (DIRECT WRITE - TIADA CHECKING)
         document.getElementById('formSignUp').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const btnSubmit = document.getElementById('btnSignUpSubmit');
             btnSubmit.disabled = true;
-            btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Memproses...`;
+            btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...`;
 
-            const nama = document.getElementById('regNama').value.trim().toUpperCase();
-            const noMatrik = document.getElementById('regMatrik').value.trim().toUpperCase();
-            const jabatan = document.getElementById('regJabatan').value;
-            const kelas = document.getElementById('regKelas').value.trim().toUpperCase();
-            const jantina = document.getElementById('regJantina').value;
-            const sesi = "SESI 1 2026/2027";
+            const newStudent = {
+                nama: document.getElementById('regNama').value.trim().toUpperCase(),
+                noMatrik: document.getElementById('regMatrik').value.trim().toUpperCase(),
+                jabatan: document.getElementById('regJabatan').value,
+                kelas: document.getElementById('regKelas').value.trim().toUpperCase(),
+                jantina: document.getElementById('regJantina').value,
+                sesi: "SESI 1 2026/2027",
+                role: "pelajar",
+                createdAt: new Date().toISOString()
+            };
 
             try {
-                // 1. Semak jika No Matrik telah berdaftar
-                const q = query(collection(db, "pelajar"), where("noMatrik", "==", noMatrik));
-                const checkSnap = await getDocs(q);
+                // HANTAR TERUS KE FIRESTORE (FAST PUSH)
+                const docRef = await addDoc(collection(db, "pelajar"), newStudent);
 
-                if (!checkSnap.empty) {
-                    alert("No. Matrik ini telah sedia berdaftar dalam sistem!");
-                    btnSubmit.disabled = false;
-                    btnSubmit.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Hantar Pendaftaran`;
-                    return;
-                }
+                // AUTO LOG IN TERUS
+                localStorage.setItem('pelajarUser', JSON.stringify({
+                    id: docRef.id,
+                    ...newStudent
+                }));
 
-                // 2. Simpan maklumat pendaftaran pelajar terus aktif
-                await addDoc(collection(db, "pelajar"), {
-                    nama: nama,
-                    noMatrik: noMatrik,
-                    jabatan: jabatan,
-                    kelas: kelas,
-                    jantina: jantina,
-                    sesi: sesi,
-                    role: "pelajar",
-                    createdAt: new Date().toISOString()
-                });
-
-                alert("Pendaftaran berjaya! Anda kini boleh log masuk.");
-                document.getElementById('formSignUp').reset();
-                switchAuthTab('signin');
+                alert("Pendaftaran Berjaya! Anda sedang dihalakan ke Dashboard.");
+                window.location.href = "dashboard-pelajar.html";
 
             } catch (error) {
-                console.error("Ralat Pendaftaran Firestore:", error);
-                alert("Gagal membuat pendaftaran: " + error.message);
-            } finally {
+                console.error("Ralat Firestore:", error);
+                alert("Gagal mendaftar: " + error.message);
                 btnSubmit.disabled = false;
                 btnSubmit.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Hantar Pendaftaran`;
             }
         });
 
-        // PROSES SIGN IN PELAJAR (HANYA GUNAKAN NO MATRIK)
+        // PROSES SIGN IN (HANYA NO MATRIK)
         document.getElementById('formSignIn').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -520,16 +507,11 @@
             const noMatrik = document.getElementById('loginMatrik').value.trim().toUpperCase();
 
             try {
-                // Cari pelajar mengikut No Matrik sahaja
-                const q = query(
-                    collection(db, "pelajar"), 
-                    where("noMatrik", "==", noMatrik)
-                );
-
+                const q = query(collection(db, "pelajar"), where("noMatrik", "==", noMatrik));
                 const querySnapshot = await getDocs(q);
 
                 if (querySnapshot.empty) {
-                    alert("No. Matrik tidak dijumpai! Sila pastikan No. Matrik adalah betul atau daftar akaun baharu.");
+                    alert("No. Matrik tidak dijumpai! Sila daftar akaun baharu.");
                     btnSubmit.disabled = false;
                     btnSubmit.innerHTML = `<i class="fa-solid fa-arrow-right-to-bracket"></i> Log Masuk`;
                     return;
@@ -543,24 +525,16 @@
                     studentId = docSnap.id;
                 });
 
-                // Simpan sesi ke localStorage
                 localStorage.setItem('pelajarUser', JSON.stringify({
                     id: studentId,
-                    nama: studentData.nama,
-                    noMatrik: studentData.noMatrik,
-                    jabatan: studentData.jabatan,
-                    kelas: studentData.kelas,
-                    jantina: studentData.jantina,
-                    role: "pelajar"
+                    ...studentData
                 }));
 
-                alert(`Selamat datang, ${studentData.nama}!`);
                 window.location.href = "dashboard-pelajar.html";
 
             } catch (error) {
-                console.error("Ralat Log Masuk Firestore:", error);
+                console.error("Ralat Log Masuk:", error);
                 alert("Gagal log masuk: " + error.message);
-            } finally {
                 btnSubmit.disabled = false;
                 btnSubmit.innerHTML = `<i class="fa-solid fa-arrow-right-to-bracket"></i> Log Masuk`;
             }
