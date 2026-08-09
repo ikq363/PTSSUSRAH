@@ -443,17 +443,14 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // DIRECT URL KE DASHBOARD GITHUB PAGES
-        const DASHBOARD_URL = "https://ikq363.github.io/PTSSUSRAH/dashboard-naqib.html";
-
-        // 1. SEMAKAN SESI
+        // 1. SEMAKAN SESI: Jika pengguna sudah diluluskan sebelum ini, terus redirect
         (function checkExistingSession() {
             const savedUser = localStorage.getItem('naqibUser');
             if (savedUser) {
                 try {
                     const user = JSON.parse(savedUser);
                     if (user && user.id && user.noMatrik) {
-                        window.location.replace(DASHBOARD_URL);
+                        window.location.replace("dashboard-naqib.html");
                     }
                 } catch (e) {
                     localStorage.removeItem('naqibUser');
@@ -489,7 +486,7 @@
             }
         };
 
-        // PROSES SIGN UP (AUTO SET STATUS KE 'sah')
+        // PROSES SIGN UP
         document.getElementById('formSignUp').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btnSubmit = document.getElementById('btnSignUpSubmit');
@@ -518,11 +515,11 @@
                     kelas: kelas,
                     role: role,
                     sesi: "SESI 1 2026/2027",
-                    status: "sah",
+                    status: "pending",
                     createdAt: serverTimestamp()
                 }));
 
-                alert("Pendaftaran berjaya! Anda kini boleh terus log masuk.");
+                alert("Pendaftaran berjaya dihantar! Sila tunggu kelulusan Admin.");
                 document.getElementById('formSignUp').reset();
                 switchAuthTab('signin');
 
@@ -534,7 +531,7 @@
             }
         });
 
-        // PROSES SIGN IN (ASAL ADA DALAM USERS = TRUS DISAHKAN & LOG MASUK)
+        // PROSES SIGN IN (SEMALAM MENGGUNAKAN NO MATRIK)
         document.getElementById('formSignIn').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -542,14 +539,16 @@
             btnSubmit.disabled = true;
             btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Menyemak...`;
 
+            const inputNama = document.getElementById('loginNama').value.trim().toUpperCase();
             const inputMatrik = document.getElementById('loginMatrik').value.trim().toUpperCase();
 
             try {
+                // Cari pengguna di koleksi 'users' berdasarkan No. Matrik
                 const q = query(collection(db, "users"), where("noMatrik", "==", inputMatrik));
                 const querySnapshot = await withTimeout(() => getDocs(q));
 
                 if (querySnapshot.empty) {
-                    alert(`Rekod tidak dijumpai bagi No. Matrik: ${inputMatrik}. Sila daftar akaun baharu.`);
+                    alert(`Rekod tidak dijumpai bagi No. Matrik: ${inputMatrik}. Sila daftar akaun baharu terlebih dahulu.`);
                     return;
                 }
 
@@ -561,17 +560,30 @@
                     userId = docSnap.id;
                 });
 
-                // ASAL WUJUD DALAM USERS -> TERUS MASUK
-                localStorage.setItem('naqibUser', JSON.stringify({
-                    id: userId,
-                    nama: userData.nama,
-                    noMatrik: userData.noMatrik,
-                    role: userData.role,
-                    jabatan: userData.jabatan,
-                    kelas: userData.kelas
-                }));
+                // Bersihkan status dari huruf besar/kecil atau ruang kosong
+                const currentStatus = String(userData.status || '').toLowerCase().trim();
 
-                window.location.replace(DASHBOARD_URL);
+                if (currentStatus === "approved") {
+                    // Simpan maklumat akaun dalam LocalStorage
+                    localStorage.setItem('naqibUser', JSON.stringify({
+                        id: userId,
+                        nama: userData.nama,
+                        noMatrik: userData.noMatrik,
+                        role: userData.role,
+                        jabatan: userData.jabatan,
+                        kelas: userData.kelas
+                    }));
+
+                    // Terus masuk ke Dashboard Naqib
+                    window.location.replace("dashboard-naqib.html");
+
+                } else if (currentStatus === "pending") {
+                    alert("Akaun anda masih PENDING. Sila dapatkan kelulusan daripada Admin sebelum log masuk.");
+                } else if (currentStatus === "rejected") {
+                    alert("Akaun anda telah DITOLAK oleh Admin.");
+                } else {
+                    alert(`Status akaun anda ialah '${userData.status}'. Pastikan Admin telah menukarnya kepada 'approved'.`);
+                }
 
             } catch (error) {
                 console.error("Ralat Log Masuk:", error);
