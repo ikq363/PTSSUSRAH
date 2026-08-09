@@ -415,7 +415,7 @@
         setInterval(updateLiveDateTime, 1000);
         updateLiveDateTime();
 
-        // PENUKAR AUTOMATIK HURUF BESAR UNTUK SEMUA INPUT
+        // Penukar automatik huruf besar untuk semua field input
         document.addEventListener('input', function(e) {
             if (e.target.classList.contains('form-control') && e.target.tagName === 'INPUT') {
                 e.target.value = e.target.value.toUpperCase();
@@ -444,6 +444,21 @@
         // Inisialisasi Firebase & Firestore
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+
+        // AUTO-REDIRECT: Jika sesi aktif ditemui, terus ke Dashboard Naqib
+        (function checkExistingSession() {
+            const savedUser = localStorage.getItem('naqibUser');
+            if (savedUser) {
+                try {
+                    const user = JSON.parse(savedUser);
+                    if (user && user.id && user.noMatrik) {
+                        window.location.href = "dashboard-naqib.html";
+                    }
+                } catch (e) {
+                    localStorage.removeItem('naqibUser');
+                }
+            }
+        })();
 
         // Helper Function untuk Timeout
         const withTimeout = (promiseFn, ms = 10000) => {
@@ -563,6 +578,7 @@
                 } else if (userData.status === "rejected") {
                     alert("Permohonan pendaftaran anda telah ditolak oleh Admin.");
                 } else if (userData.status === "approved") {
+                    // Simpan sesi log masuk
                     localStorage.setItem('naqibUser', JSON.stringify({
                         id: userId,
                         nama: userData.nama,
@@ -573,6 +589,7 @@
                     }));
 
                     alert(`Selamat datang, ${userData.nama}!`);
+                    // Terus ke Dashboard Naqib
                     window.location.href = "dashboard-naqib.html";
                 }
 
