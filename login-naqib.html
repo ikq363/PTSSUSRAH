@@ -253,6 +253,36 @@
             box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4);
         }
 
+        .btn-submit:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            display: none;
+            margin-bottom: 10px;
+        }
+
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid #10b981;
+            color: #6ee7b7;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
         footer { text-align: center; padding: 20px; font-size: 11px; color: #64748b; }
     </style>
 </head>
@@ -293,6 +323,9 @@
                     <i class="fa-solid fa-user-plus"></i> Sign Up
                 </button>
             </div>
+
+            <!-- Alert Messages -->
+            <div id="alertMessage" class="alert"></div>
 
             <!-- BORANG SIGN IN -->
             <form id="formSignIn" class="auth-form active">
@@ -420,6 +453,15 @@
                 e.target.value = e.target.value.toUpperCase();
             }
         });
+
+        function showAlert(message, type = 'danger') {
+            const alertEl = document.getElementById('alertMessage');
+            alertEl.textContent = message;
+            alertEl.className = `alert alert-${type} show`;
+            setTimeout(() => {
+                alertEl.className = 'alert';
+            }, 5000);
+        }
     </script>
 
     <!-- FIREBASE SDK v10 (FIRESTORE) -->
@@ -443,10 +485,10 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // DIRECT URL KE DASHBOARD GITHUB PAGES
-        const DASHBOARD_URL = "https://ikq363.github.io/PTSSUSRAH/dashboard-naqib.html";
+        // Guna relative path untuk dashboard
+        const DASHBOARD_URL = "dashboard-naqib.html";
 
-        // 1. SEMAKAN SESI
+        // 1. SEMAKAN SESI - Redirect ke dashboard jika sudah login
         (function checkExistingSession() {
             const savedUser = localStorage.getItem('naqibUser');
             if (savedUser) {
@@ -465,10 +507,30 @@
             return Promise.race([
                 promiseFn(),
                 new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error("Masa tamat. Semak sambungan internet/Rules Firestore!")), ms)
+                    setTimeout(() => reject(new Error("Masa tamat. Semak sambungan internet/Firestore!")), ms)
                 )
             ]);
         };
+
+        // Fungsi untuk redirect ke dashboard dengan selamat
+        function redirectToDashboard(userData, userId) {
+            try {
+                localStorage.setItem('naqibUser', JSON.stringify({
+                    id: userId,
+                    nama: userData.nama || '',
+                    noMatrik: userData.noMatrik || '',
+                    role: userData.role || 'naqib',
+                    jabatan: userData.jabatan || '',
+                    kelas: userData.kelas || ''
+                }));
+                
+                // Redirect ke dashboard
+                window.location.replace(DASHBOARD_URL);
+            } catch (error) {
+                console.error("Error redirecting:", error);
+                showAlert("Gagal mengalihkan ke dashboard. Sila cuba lagi.", "danger");
+            }
+        }
 
         window.switchAuthTab = function(type) {
             const tabSignIn = document.getElementById('tabSignIn');
@@ -489,7 +551,7 @@
             }
         };
 
-        // PROSES SIGN UP (AUTO SET STATUS KE 'sah')
+        // PROSES SIGN UP
         document.getElementById('formSignUp').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btnSubmit = document.getElementById('btnSignUpSubmit');
@@ -502,12 +564,19 @@
             const kelas = document.getElementById('regKelas').value.trim().toUpperCase();
             const role = document.getElementById('regRole').value;
 
+            if (!nama || !noMatrik || !jabatan || !kelas) {
+                showAlert("Sila lengkapkan semua maklumat pendaftaran.", "danger");
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Hantar Pendaftaran`;
+                return;
+            }
+
             try {
                 const q = query(collection(db, "users"), where("noMatrik", "==", noMatrik));
                 const checkSnap = await withTimeout(() => getDocs(q));
 
                 if (!checkSnap.empty) {
-                    alert("No. Matrik ini telah berdaftar!");
+                    showAlert("No. Matrik ini telah berdaftar! Sila log masuk.", "danger");
                     return;
                 }
 
@@ -522,19 +591,20 @@
                     createdAt: serverTimestamp()
                 }));
 
-                alert("Pendaftaran berjaya! Anda kini boleh terus log masuk.");
+                showAlert("Pendaftaran berjaya! Anda boleh log masuk sekarang.", "success");
                 document.getElementById('formSignUp').reset();
-                switchAuthTab('signin');
+                setTimeout(() => switchAuthTab('signin'), 1000);
 
             } catch (error) {
-                alert("Gagal mendaftar: " + error.message);
+                console.error("Registration error:", error);
+                showAlert("Gagal mendaftar: " + error.message, "danger");
             } finally {
                 btnSubmit.disabled = false;
                 btnSubmit.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Hantar Pendaftaran`;
             }
         });
 
-        // PROSES SIGN IN (ASAL ADA DALAM USERS = TRUS DISAHKAN & LOG MASUK)
+        // PROSES SIGN IN - Redirect ke dashboard selepas berjaya
         document.getElementById('formSignIn').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -542,14 +612,28 @@
             btnSubmit.disabled = true;
             btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Menyemak...`;
 
+            const inputNama = document.getElementById('loginNama').value.trim().toUpperCase();
             const inputMatrik = document.getElementById('loginMatrik').value.trim().toUpperCase();
 
+            if (!inputNama || !inputMatrik) {
+                showAlert("Sila masukkan nama dan no. matrik.", "danger");
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = `<i class="fa-solid fa-arrow-right-to-bracket"></i> Log Masuk`;
+                return;
+            }
+
             try {
-                const q = query(collection(db, "users"), where("noMatrik", "==", inputMatrik));
+                // Semak dengan no matrik dan nama
+                const q = query(
+                    collection(db, "users"), 
+                    where("noMatrik", "==", inputMatrik),
+                    where("nama", "==", inputNama)
+                );
+                
                 const querySnapshot = await withTimeout(() => getDocs(q));
 
                 if (querySnapshot.empty) {
-                    alert(`Rekod tidak dijumpai bagi No. Matrik: ${inputMatrik}. Sila daftar akaun baharu.`);
+                    showAlert(`Rekod tidak dijumpai untuk No. Matrik: ${inputMatrik}. Sila daftar akaun atau semak maklumat.`, "danger");
                     return;
                 }
 
@@ -561,21 +645,18 @@
                     userId = docSnap.id;
                 });
 
-                // ASAL WUJUD DALAM USERS -> TERUS MASUK
-                localStorage.setItem('naqibUser', JSON.stringify({
-                    id: userId,
-                    nama: userData.nama,
-                    noMatrik: userData.noMatrik,
-                    role: userData.role,
-                    jabatan: userData.jabatan,
-                    kelas: userData.kelas
-                }));
+                // Semak status
+                if (userData.status !== 'sah') {
+                    showAlert(`Akaun anda status: ${userData.status}. Sila hubungi pentadbir.`, "danger");
+                    return;
+                }
 
-                window.location.replace(DASHBOARD_URL);
+                // Redirect ke dashboard
+                redirectToDashboard(userData, userId);
 
             } catch (error) {
-                console.error("Ralat Log Masuk:", error);
-                alert("Gagal log masuk: " + error.message);
+                console.error("Login error:", error);
+                showAlert("Gagal log masuk: " + error.message, "danger");
             } finally {
                 btnSubmit.disabled = false;
                 btnSubmit.innerHTML = `<i class="fa-solid fa-arrow-right-to-bracket"></i> Log Masuk`;
