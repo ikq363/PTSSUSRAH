@@ -427,22 +427,33 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { 
-            getFirestore, collection, query, where, getDocs, addDoc 
+            getFirestore, collection, query, where, getDocs, addDoc, serverTimestamp 
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // 🔴 SILA SALIN & PASTE FIREBASE CONFIG ANDA DI SINI
+        // ✅ FIREBASE CONFIG UNTUK PROJEK PTSSUSRAH
         const firebaseConfig = {
-            apiKey: "AIzaSyYOUR_API_KEY_HERE",
-            authDomain: "your-project-id.firebaseapp.com",
-            projectId: "your-project-id",
-            storageBucket: "your-project-id.appspot.com",
-            messagingSenderId: "123456789012",
-            appId: "1:123456789012:web:abcdef123456"
+            apiKey: "AIzaSyDZWnQZou365jx6NtOFAWN_uNkZ3ppRvl0",
+            authDomain: "ptssusrah.firebaseapp.com",
+            projectId: "ptssusrah",
+            storageBucket: "ptssusrah.firebasestorage.app",
+            messagingSenderId: "859008504533",
+            appId: "1:859008504533:web:51d6ccdbf3b4e090aec85c",
+            measurementId: "G-D185J3E844"
         };
 
         // Inisialisasi Firebase & Firestore
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+
+        // Helper Function untuk cegah 'hanging/loading' berterusan jika tiada sambungan
+        const fetchWithTimeout = (promise, ms = 10000) => {
+            return Promise.race([
+                promise,
+                new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error("Sambungan ke Firestore terputus atau lambat (Timeout). Semak sambungan internet atau Security Rules Firestore anda!")), ms)
+                )
+            ]);
+        };
 
         // FUNGSI TUKAR TAB SIGN IN / SIGN UP
         window.switchAuthTab = function(type) {
@@ -482,17 +493,15 @@
             try {
                 // 1. Semak jika No Matrik telah sedia berdaftar
                 const q = query(collection(db, "users"), where("noMatrik", "==", noMatrik));
-                const checkSnap = await getDocs(q);
+                const checkSnap = await fetchWithTimeout(getDocs(q));
 
                 if (!checkSnap.empty) {
                     alert("No. Matrik ini telah berdaftar dalam sistem!");
-                    btnSubmit.disabled = false;
-                    btnSubmit.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Hantar Pendaftaran`;
                     return;
                 }
 
                 // 2. Simpan maklumat pendaftaran baharu dengan status 'pending'
-                await addDoc(collection(db, "users"), {
+                await fetchWithTimeout(addDoc(collection(db, "users"), {
                     nama: nama,
                     noMatrik: noMatrik,
                     jabatan: jabatan,
@@ -500,8 +509,8 @@
                     role: role,
                     sesi: sesi,
                     status: "pending", // Memerlukan Kelulusan Admin
-                    createdAt: new Date().toISOString()
-                });
+                    createdAt: serverTimestamp()
+                }));
 
                 alert("Pendaftaran berjaya dihantar! Sila tunggu kelulusan daripada Admin sebelum anda boleh log masuk.");
                 document.getElementById('formSignUp').reset();
@@ -535,12 +544,10 @@
                     where("nama", "==", nama)
                 );
 
-                const querySnapshot = await getDocs(q);
+                const querySnapshot = await fetchWithTimeout(getDocs(q));
 
                 if (querySnapshot.empty) {
                     alert("Akaun tidak dijumpai! Sila pastikan Nama Penuh dan No. Matrik adalah betul atau daftar akaun baharu.");
-                    btnSubmit.disabled = false;
-                    btnSubmit.innerHTML = `<i class="fa-solid fa-arrow-right-to-bracket"></i> Log Masuk`;
                     return;
                 }
 
