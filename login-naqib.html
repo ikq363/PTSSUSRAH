@@ -430,7 +430,7 @@
             getFirestore, collection, query, where, getDocs, addDoc, serverTimestamp 
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // ✅ FIREBASE CONFIG UNTUK PROJEK PTSSUSRAH
+        // CONFIG FIREBASE PTSSUSRAH
         const firebaseConfig = {
             apiKey: "AIzaSyDZWnQZou365jx6NtOFAWN_uNkZ3ppRvl0",
             authDomain: "ptssusrah.firebaseapp.com",
@@ -445,12 +445,12 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Helper Function untuk cegah 'hanging/loading' berterusan jika tiada sambungan
-        const fetchWithTimeout = (promise, ms = 10000) => {
+        // Helper Function untuk Timeout
+        const withTimeout = (promiseFn, ms = 10000) => {
             return Promise.race([
-                promise,
+                promiseFn(),
                 new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error("Sambungan ke Firestore terputus atau lambat (Timeout). Semak sambungan internet atau Security Rules Firestore anda!")), ms)
+                    setTimeout(() => reject(new Error("Masa tamat (Timeout). Semak sambungan internet atau Security Rules Firestore!")), ms)
                 )
             ]);
         };
@@ -475,7 +475,7 @@
             }
         };
 
-        // PROSES SIGN UP (FIRESTORE WRITE)
+        // PROSES SIGN UP
         document.getElementById('formSignUp').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -493,22 +493,22 @@
             try {
                 // 1. Semak jika No Matrik telah sedia berdaftar
                 const q = query(collection(db, "users"), where("noMatrik", "==", noMatrik));
-                const checkSnap = await fetchWithTimeout(getDocs(q));
+                const checkSnap = await withTimeout(() => getDocs(q));
 
                 if (!checkSnap.empty) {
                     alert("No. Matrik ini telah berdaftar dalam sistem!");
                     return;
                 }
 
-                // 2. Simpan maklumat pendaftaran baharu dengan status 'pending'
-                await fetchWithTimeout(addDoc(collection(db, "users"), {
+                // 2. Simpan maklumat pendaftaran baharu
+                await withTimeout(() => addDoc(collection(db, "users"), {
                     nama: nama,
                     noMatrik: noMatrik,
                     jabatan: jabatan,
                     kelas: kelas,
                     role: role,
                     sesi: sesi,
-                    status: "pending", // Memerlukan Kelulusan Admin
+                    status: "pending",
                     createdAt: serverTimestamp()
                 }));
 
@@ -525,7 +525,7 @@
             }
         });
 
-        // PROSES SIGN IN (FIRESTORE READ & APPROVAL CHECK)
+        // PROSES SIGN IN
         document.getElementById('formSignIn').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -537,14 +537,13 @@
             const noMatrik = document.getElementById('loginMatrik').value.trim().toUpperCase();
 
             try {
-                // Cari pengguna mengikut No Matrik dan Nama Penuh
                 const q = query(
                     collection(db, "users"), 
                     where("noMatrik", "==", noMatrik),
                     where("nama", "==", nama)
                 );
 
-                const querySnapshot = await fetchWithTimeout(getDocs(q));
+                const querySnapshot = await withTimeout(() => getDocs(q));
 
                 if (querySnapshot.empty) {
                     alert("Akaun tidak dijumpai! Sila pastikan Nama Penuh dan No. Matrik adalah betul atau daftar akaun baharu.");
@@ -559,13 +558,11 @@
                     userId = docSnap.id;
                 });
 
-                // SEMAK STATUS KELULUSAN ADMIN
                 if (userData.status === "pending") {
                     alert("Akaun anda masih dalam proses pendaftaran dan BELUM DILULUSKAN oleh Admin.");
                 } else if (userData.status === "rejected") {
                     alert("Permohonan pendaftaran anda telah ditolak oleh Admin.");
                 } else if (userData.status === "approved") {
-                    // Simpan maklumat sesi log masuk
                     localStorage.setItem('naqibUser', JSON.stringify({
                         id: userId,
                         nama: userData.nama,
@@ -576,7 +573,7 @@
                     }));
 
                     alert(`Selamat datang, ${userData.nama}!`);
-                    window.location.href = "dashboard-naqib.html"; // Bawa ke dashboard Naqib
+                    window.location.href = "dashboard-naqib.html";
                 }
 
             } catch (error) {
