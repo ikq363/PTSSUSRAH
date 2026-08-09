@@ -415,7 +415,6 @@
         setInterval(updateLiveDateTime, 1000);
         updateLiveDateTime();
 
-        // Penukar automatik huruf besar untuk semua field input
         document.addEventListener('input', function(e) {
             if (e.target.classList.contains('form-control') && e.target.tagName === 'INPUT') {
                 e.target.value = e.target.value.toUpperCase();
@@ -441,18 +440,17 @@
             measurementId: "G-D185J3E844"
         };
 
-        // Inisialisasi Firebase & Firestore
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // AUTO-REDIRECT: Jika sesi aktif ditemui, terus ke Dashboard Naqib
+        // 1. SEMAKAN SESI: Jika pengguna sudah diluluskan sebelum ini, terus redirect
         (function checkExistingSession() {
             const savedUser = localStorage.getItem('naqibUser');
             if (savedUser) {
                 try {
                     const user = JSON.parse(savedUser);
                     if (user && user.id && user.noMatrik) {
-                        window.location.href = "dashboard-naqib.html";
+                        window.location.replace("dashboard-naqib.html");
                     }
                 } catch (e) {
                     localStorage.removeItem('naqibUser');
@@ -460,17 +458,15 @@
             }
         })();
 
-        // Helper Function untuk Timeout
         const withTimeout = (promiseFn, ms = 10000) => {
             return Promise.race([
                 promiseFn(),
                 new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error("Masa tamat (Timeout). Semak sambungan internet atau Security Rules Firestore!")), ms)
+                    setTimeout(() => reject(new Error("Masa tamat. Semak sambungan internet/Rules Firestore!")), ms)
                 )
             ]);
         };
 
-        // FUNGSI TUKAR TAB SIGN IN / SIGN UP
         window.switchAuthTab = function(type) {
             const tabSignIn = document.getElementById('tabSignIn');
             const tabSignUp = document.getElementById('tabSignUp');
@@ -493,7 +489,6 @@
         // PROSES SIGN UP
         document.getElementById('formSignUp').addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const btnSubmit = document.getElementById('btnSignUpSubmit');
             btnSubmit.disabled = true;
             btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Memproses...`;
@@ -503,44 +498,40 @@
             const jabatan = document.getElementById('regJabatan').value;
             const kelas = document.getElementById('regKelas').value.trim().toUpperCase();
             const role = document.getElementById('regRole').value;
-            const sesi = "SESI 1 2026/2027";
 
             try {
-                // 1. Semak jika No Matrik telah sedia berdaftar
                 const q = query(collection(db, "users"), where("noMatrik", "==", noMatrik));
                 const checkSnap = await withTimeout(() => getDocs(q));
 
                 if (!checkSnap.empty) {
-                    alert("No. Matrik ini telah berdaftar dalam sistem!");
+                    alert("No. Matrik ini telah berdaftar!");
                     return;
                 }
 
-                // 2. Simpan maklumat pendaftaran baharu
                 await withTimeout(() => addDoc(collection(db, "users"), {
                     nama: nama,
                     noMatrik: noMatrik,
                     jabatan: jabatan,
                     kelas: kelas,
                     role: role,
-                    sesi: sesi,
+                    sesi: "SESI 1 2026/2027",
                     status: "pending",
                     createdAt: serverTimestamp()
                 }));
 
-                alert("Pendaftaran berjaya dihantar! Sila tunggu kelulusan daripada Admin sebelum anda boleh log masuk.");
+                alert("Pendaftaran berjaya dihantar! Sila tunggu kelulusan Admin.");
                 document.getElementById('formSignUp').reset();
                 switchAuthTab('signin');
 
             } catch (error) {
-                console.error("Ralat Pendaftaran Firestore:", error);
-                alert("Gagal membuat pendaftaran: " + error.message);
+                alert("Gagal mendaftar: " + error.message);
             } finally {
                 btnSubmit.disabled = false;
                 btnSubmit.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Hantar Pendaftaran`;
             }
         });
 
-        // PROSES SIGN IN
+        // PROSES SIGN IN (SEMALAM MENGGUNAKAN NO MATRIK)
         document.getElementById('formSignIn').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -548,20 +539,16 @@
             btnSubmit.disabled = true;
             btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Menyemak...`;
 
-            const nama = document.getElementById('loginNama').value.trim().toUpperCase();
-            const noMatrik = document.getElementById('loginMatrik').value.trim().toUpperCase();
+            const inputNama = document.getElementById('loginNama').value.trim().toUpperCase();
+            const inputMatrik = document.getElementById('loginMatrik').value.trim().toUpperCase();
 
             try {
-                const q = query(
-                    collection(db, "users"), 
-                    where("noMatrik", "==", noMatrik),
-                    where("nama", "==", nama)
-                );
-
+                // Cari pengguna di koleksi 'users' berdasarkan No. Matrik
+                const q = query(collection(db, "users"), where("noMatrik", "==", inputMatrik));
                 const querySnapshot = await withTimeout(() => getDocs(q));
 
                 if (querySnapshot.empty) {
-                    alert("Akaun tidak dijumpai! Sila pastikan Nama Penuh dan No. Matrik adalah betul atau daftar akaun baharu.");
+                    alert(`Rekod tidak dijumpai bagi No. Matrik: ${inputMatrik}. Sila daftar akaun baharu terlebih dahulu.`);
                     return;
                 }
 
@@ -573,12 +560,11 @@
                     userId = docSnap.id;
                 });
 
-                if (userData.status === "pending") {
-                    alert("Akaun anda masih dalam proses pendaftaran dan BELUM DILULUSKAN oleh Admin.");
-                } else if (userData.status === "rejected") {
-                    alert("Permohonan pendaftaran anda telah ditolak oleh Admin.");
-                } else if (userData.status === "approved") {
-                    // Simpan sesi log masuk
+                // Bersihkan status dari huruf besar/kecil atau ruang kosong
+                const currentStatus = String(userData.status || '').toLowerCase().trim();
+
+                if (currentStatus === "approved") {
+                    // Simpan maklumat akaun dalam LocalStorage
                     localStorage.setItem('naqibUser', JSON.stringify({
                         id: userId,
                         nama: userData.nama,
@@ -588,13 +574,19 @@
                         kelas: userData.kelas
                     }));
 
-                    alert(`Selamat datang, ${userData.nama}!`);
-                    // Terus ke Dashboard Naqib
-                    window.location.href = "dashboard-naqib.html";
+                    // Terus masuk ke Dashboard Naqib
+                    window.location.replace("dashboard-naqib.html");
+
+                } else if (currentStatus === "pending") {
+                    alert("Akaun anda masih PENDING. Sila dapatkan kelulusan daripada Admin sebelum log masuk.");
+                } else if (currentStatus === "rejected") {
+                    alert("Akaun anda telah DITOLAK oleh Admin.");
+                } else {
+                    alert(`Status akaun anda ialah '${userData.status}'. Pastikan Admin telah menukarnya kepada 'approved'.`);
                 }
 
             } catch (error) {
-                console.error("Ralat Log Masuk Firestore:", error);
+                console.error("Ralat Log Masuk:", error);
                 alert("Gagal log masuk: " + error.message);
             } finally {
                 btnSubmit.disabled = false;
