@@ -125,6 +125,8 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             padding-bottom: 15px;
             margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .profile-avatar {
@@ -282,7 +284,7 @@
                     <p id="displayNama">-</p>
                 </div>
                 <div class="info-item">
-                    <label>No. ID / Staf / Matrik</label>
+                    <label>No. Matrik / ID</label>
                     <p id="displayID">-</p>
                 </div>
                 <div class="info-item">
@@ -300,6 +302,14 @@
                 <div class="info-item">
                     <label>Jantina</label>
                     <p id="displayJantina">-</p>
+                </div>
+                <div class="info-item">
+                    <label>Kelas</label>
+                    <p id="displayKelas">-</p>
+                </div>
+                <div class="info-item">
+                    <label>Sesi</label>
+                    <p id="displaySesi">-</p>
                 </div>
             </div>
         </div>
@@ -320,7 +330,7 @@
                 </div>
                 <div class="input-group">
                     <label>No. Telefon</label>
-                    <input type="text" id="editPhone" class="form-control" placeholder="Contoh: 0123456789" required>
+                    <input type="text" id="editPhone" class="form-control" placeholder="Contoh: 0123456789">
                 </div>
                 <div class="input-group">
                     <label>Jabatan</label>
@@ -350,8 +360,12 @@
     <!-- FIREBASE SDK v10 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { 
+            getAuth, onAuthStateChanged, signOut, updateProfile 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { 
+            getFirestore, doc, getDoc, updateDoc, serverTimestamp 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDZWnQZou365jx6NtOFAWN_uNkZ3ppRvl0",
@@ -369,48 +383,43 @@
 
         let currentUserId = null;
 
-        // SEMAK LOG MASUK PENGGUNA (REALTIME CHECK)
+        // SEMAK LOG MASUK PENGGUNA
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUserId = user.uid;
                 await loadUserProfile(user);
             } else {
+                // Redirect ke login jika tiada session
                 window.location.href = "login-naqib.html";
             }
         });
 
-        // MEMUATKAN PROFIL (SYNCHRONIZED WITH LOGIN DATA)
+        // MEMUATKAN PROFIL
         async function loadUserProfile(authUser) {
             try {
                 const userRef = doc(db, "users", authUser.uid);
                 const userDoc = await getDoc(userRef);
 
-                let data = {};
-
-                if (userDoc.exists()) {
-                    data = userDoc.data();
-                } else {
-                    // Jika profil belum wujud dalam Firestore, cipta rekod asas secara automatik
-                    data = {
-                        nama: authUser.displayName || authUser.email.split('@')[0].toUpperCase(),
-                        email: authUser.email,
-                        role: "Naqib",
-                        status: "Aktif",
-                        createdAt: new Date()
-                    };
-                    await setDoc(userRef, data, { merge: true });
+                if (!userDoc.exists()) {
+                    console.error("Profil tidak ditemui!");
+                    window.location.href = "login-naqib.html";
+                    return;
                 }
 
-                // EKSPLISIT FALLBACK: Menyokong pelbagai nama kunci pembolehubah dari login page
-                const nama = data.nama || data.fullname || data.name || authUser.displayName || "Naqib";
-                const noID = data.noID || data.noMatrik || data.idStaf || data.icNumber || "-";
+                const data = userDoc.data();
+
+                // EKSPLISIT FALLBACK untuk semua field
+                const nama = data.nama || data.fullname || data.name || "Naqib";
+                const noID = data.noMatrik || data.noID || data.idStaf || "-";
                 const phone = data.phone || data.noTel || data.noPhone || "-";
                 const email = data.email || authUser.email || "-";
-                const jabatan = data.jabatan || data.department || "JTMK";
+                const jabatan = data.jabatan || data.department || "-";
                 const jantina = (data.jantina || data.gender || "LELAKI").toUpperCase();
                 const status = data.status || "Aktif";
+                const kelas = data.kelas || data.class || "-";
+                const sesi = data.sesi || data.session || "-";
 
-                // DIKEMAS KINI KE ELEMEN UI
+                // KEMAS KINI ELEMEN UI
                 document.getElementById('displayNamaHeader').innerText = nama;
                 document.getElementById('displayNama').innerText = nama;
                 document.getElementById('displayID').innerText = noID;
@@ -419,6 +428,8 @@
                 document.getElementById('displayJabatan').innerText = jabatan;
                 document.getElementById('displayJantina').innerText = jantina;
                 document.getElementById('displayStatus').innerText = status;
+                document.getElementById('displayKelas').innerText = kelas;
+                document.getElementById('displaySesi').innerText = sesi;
                 document.getElementById('avatarInitial').innerText = nama.trim().charAt(0).toUpperCase();
 
                 // PRATETAP DALAM BORANG POPUP EDIT
@@ -441,7 +452,7 @@
             document.getElementById('editProfileModal').style.display = 'none';
         };
 
-        // SIMPAN KEMAS KINI PROFIL KE FIRESTORE
+        // SIMPAN KEMAS KINI PROFIL
         document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!currentUserId) return;
@@ -453,20 +464,29 @@
             const updatedData = {
                 nama: document.getElementById('editNama').value.trim().toUpperCase(),
                 phone: document.getElementById('editPhone').value.trim(),
-                noTel: document.getElementById('editPhone').value.trim(), // Salinan untuk memastikan keserasian
+                noTel: document.getElementById('editPhone').value.trim(),
                 jabatan: document.getElementById('editJabatan').value,
                 jantina: document.getElementById('editJantina').value,
-                updatedAt: new Date()
+                updatedAt: serverTimestamp()
             };
 
             try {
+                // Update Firestore
                 const docRef = doc(db, "users", currentUserId);
                 await updateDoc(docRef, updatedData);
+
+                // Update Auth Profile
+                const user = auth.currentUser;
+                if (user) {
+                    await updateProfile(user, {
+                        displayName: updatedData.nama
+                    });
+                }
 
                 alert("Profil berjaya dikemas kini!");
                 closeEditProfileModal();
                 
-                // Muat semula data dari Firestore
+                // Muat semula data
                 if (auth.currentUser) {
                     await loadUserProfile(auth.currentUser);
                 }
@@ -484,10 +504,20 @@
         window.logout = function() {
             if (confirm("Adakah anda pasti ingin log keluar?")) {
                 signOut(auth).then(() => {
+                    localStorage.removeItem('naqibUser');
                     window.location.href = "login-naqib.html";
+                }).catch((error) => {
+                    console.error("Error logging out:", error);
                 });
             }
         };
+
+        // Klik luar modal untuk tutup
+        document.getElementById('editProfileModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEditProfileModal();
+            }
+        });
     </script>
 </body>
 </html>
