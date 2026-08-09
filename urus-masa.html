@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urus Masa Usrah Berulang - e-Usrah PTSS</title>
+    <!-- FontAwesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-gold: #d4af37;
+            --emerald-green: #059669;
+            --bg-dark: #0b1329;
+            --card-glass: rgba(15, 23, 42, 0.85);
+            --border-glass: rgba(212, 175, 55, 0.3);
+            --danger-color: #ef4444;
+            --edit-color: #3b82f6;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(rgba(11, 19, 41, 0.92), rgba(6, 78, 59, 0.88)),
+                        url('https://images.unsplash.com/photo-1542816417-0983cbe82752?q=80&w=1920&auto=format&fit=crop') no-repeat center center/cover;
+            background-attachment: fixed;
+            color: #ffffff;
+            padding-bottom: 40px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 5%;
+            background: rgba(11, 19, 41, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        .logo-area { display: flex; align-items: center; gap: 12px; }
+        .logo-icon {
+            width: 45px; height: 45px;
+            background: linear-gradient(135deg, var(--emerald-green), #047857);
+            border-radius: 12px; display: flex; justify-content: center; align-items: center;
+            font-size: 22px; color: #fff;
+        }
+
+        .container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
+
+        .card {
+            background: var(--card-glass);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        .card-title {
+            font-size: 16px;
+            color: var(--primary-gold);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* FORM GRID */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .input-group label {
+            font-size: 11px;
+            color: var(--primary-gold);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-gold);
+        }
+
+        select.form-control option { background: #0f172a; color: #fff; }
+
+        .badge-repeat {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border: 1px solid #3b82f6;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-submit {
+            grid-column: 1 / -1;
+            margin-top: 10px;
+            background: linear-gradient(135deg, var(--emerald-green), #047857);
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        /* TABLE */
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+        th { background: rgba(5, 150, 105, 0.3); color: var(--primary-gold); padding: 14px; font-weight: 600; text-transform: uppercase; }
+        td { padding: 12px 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); vertical-align: middle; }
+        tr:hover { background: rgba(255, 255, 255, 0.03); }
+
+        .btn-delete {
+            background: var(--danger-color);
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .btn-delete:hover { background: #dc2626; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area">
+            <div class="logo-icon"><i class="fa-solid fa-rotate"></i></div>
+            <div>
+                <h2 style="font-size: 18px;">Tetapan Masa Usrah Mingguan</h2>
+                <p style="font-size: 11px; color: var(--primary-gold);">e-Usrah PTSS</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- FORM TETAPKAN MASA BERULANG -->
+        <div class="card">
+            <div class="card-title"><i class="fa-solid fa-calendar-repeat"></i> Tetapkan Jadual Usrah Berulang</div>
+            <form id="recurringTimeForm" class="form-grid">
+                <!-- PILIH HARI -->
+                <div class="input-group">
+                    <label>Pilih Hari (Berulang)</label>
+                    <select id="selectHari" class="form-control" required>
+                        <option value="">-- PILIH HARI --</option>
+                        <option value="Isnin">Setiap Isnin</option>
+                        <option value="Selasa">Setiap Selasa</option>
+                        <option value="Rabu">Setiap Rabu</option>
+                        <option value="Khamis">Setiap Khamis</option>
+                        <option value="Jumaat">Setiap Jumaat</option>
+                        <option value="Sabtu">Setiap Sabtu</option>
+                        <option value="Ahad">Setiap Ahad</option>
+                    </select>
+                </div>
+
+                <!-- MASA MULA -->
+                <div class="input-group">
+                    <label>Masa Mula Usrah</label>
+                    <input type="time" id="timeMula" class="form-control" required>
+                </div>
+
+                <!-- MASA TAMAT -->
+                <div class="input-group">
+                    <label>Masa Tamat Usrah</label>
+                    <input type="time" id="timeTamat" class="form-control" required>
+                </div>
+
+                <button type="submit" class="btn-submit" id="btnSave">
+                    <i class="fa-solid fa-rotate"></i> Simpan Tetapan Berulang
+                </button>
+            </form>
+        </div>
+
+        <!-- SENARAI JADUAL BERULANG -->
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Hari Ulangan</th>
+                        <th>Masa Mula</th>
+                        <th>Masa Tamat</th>
+                        <th>Kekerapan</th>
+                        <th>Tindakan</th>
+                    </tr>
+                </thead>
+                <tbody id="scheduleTableBody">
+                    <tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 20px;">Memuatkan tetapan jadual...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- FIREBASE SDK v10 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDZWnQZou365jx6NtOFAWN_uNkZ3ppRvl0",
+            authDomain: "ptssusrah.firebaseapp.com",
+            projectId: "ptssusrah",
+            storageBucket: "ptssusrah.firebasestorage.app",
+            messagingSenderId: "859008504533",
+            appId: "1:859008504533:web:51d6ccdbf3b4e090aec85c",
+            measurementId: "G-D185J3E844"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // AMBIL DATA JADUAL BERULANG
+        async function loadSchedules() {
+            const tbody = document.getElementById('scheduleTableBody');
+            try {
+                const querySnapshot = await getDocs(collection(db, "usrah_sessions"));
+                let html = '';
+                let index = 1;
+
+                if (querySnapshot.empty) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 20px;">Tiada tetapan berulang disimpan.</td></tr>';
+                    return;
+                }
+
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    html += `
+                        <tr>
+                            <td>${index++}</td>
+                            <td style="font-weight: 600; color: var(--primary-gold);">${data.hari}</td>
+                            <td>${data.masaMula}</td>
+                            <td>${data.masaTamat}</td>
+                            <td>
+                                <span class="badge-repeat">
+                                    <i class="fa-solid fa-arrows-rotate"></i> Setiap Minggu
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn-delete" onclick="deleteSchedule('${docSnap.id}')">
+                                    <i class="fa-solid fa-trash"></i> Padam
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                tbody.innerHTML = html;
+            } catch (error) {
+                console.error("Ralat memuatkan jadual:", error);
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--danger-color); padding: 20px;">Gagal memuatkan data.</td></tr>';
+            }
+        }
+
+        // SIMPAN JADUAL BERULANG KE FIRESTORE
+        document.getElementById('recurringTimeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btnSave = document.getElementById('btnSave');
+            btnSave.disabled = true;
+            btnSave.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...`;
+
+            const hari = document.getElementById('selectHari').value;
+            const masaMula = document.getElementById('timeMula').value;
+            const masaTamat = document.getElementById('timeTamat').value;
+
+            try {
+                await addDoc(collection(db, "usrah_sessions"), {
+                    hari: hari,
+                    masaMula: masaMula,
+                    masaTamat: masaTamat,
+                    isRecurring: true, // Menandakan bahawa tetapan ini berulang
+                    type: "Mingguan",
+                    updatedAt: new Date()
+                });
+
+                alert(`Tetapan berjaya disimpan! Usrah akan ditetapkan pada ${hari} (Waktu: ${masaMula} - ${masaTamat}) secara berulang setiap minggu.`);
+                document.getElementById('recurringTimeForm').reset();
+                loadSchedules();
+            } catch (error) {
+                console.error("Ralat menyimpan jadual:", error);
+                alert("Gagal menyimpan: " + error.message);
+            } finally {
+                btnSave.disabled = false;
+                btnSave.innerHTML = `<i class="fa-solid fa-rotate"></i> Simpan Tetapan Berulang`;
+            }
+        });
+
+        // PADAM TETAPAN
+        window.deleteSchedule = async function(docId) {
+            if (confirm("Adakah anda pasti ingin memadam tetapan jadual berulang ini?")) {
+                try {
+                    await deleteDoc(doc(db, "usrah_sessions", docId));
+                    alert("Tetapan berjaya dipadam!");
+                    loadSchedules();
+                } catch (error) {
+                    console.error("Ralat memadam:", error);
+                    alert("Gagal memadam: " + error.message);
+                }
+            }
+        };
+
+        loadSchedules();
+    </script>
+</body>
+</html>
