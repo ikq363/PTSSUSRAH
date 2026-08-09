@@ -253,36 +253,6 @@
             box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4);
         }
 
-        .btn-submit:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        .alert {
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 13px;
-            display: none;
-            margin-bottom: 10px;
-        }
-
-        .alert-danger {
-            background: rgba(239, 68, 68, 0.2);
-            border: 1px solid #ef4444;
-            color: #fca5a5;
-        }
-
-        .alert-success {
-            background: rgba(16, 185, 129, 0.2);
-            border: 1px solid #10b981;
-            color: #6ee7b7;
-        }
-
-        .alert.show {
-            display: block;
-        }
-
         footer { text-align: center; padding: 20px; font-size: 11px; color: #64748b; }
     </style>
 </head>
@@ -323,9 +293,6 @@
                     <i class="fa-solid fa-user-plus"></i> Sign Up
                 </button>
             </div>
-
-            <!-- Alert Messages -->
-            <div id="alertMessage" class="alert"></div>
 
             <!-- BORANG SIGN IN -->
             <form id="formSignIn" class="auth-form active">
@@ -453,27 +420,13 @@
                 e.target.value = e.target.value.toUpperCase();
             }
         });
-
-        function showAlert(message, type = 'danger') {
-            const alertEl = document.getElementById('alertMessage');
-            alertEl.textContent = message;
-            alertEl.className = `alert alert-${type} show`;
-            setTimeout(() => {
-                alertEl.className = 'alert';
-            }, 5000);
-        }
     </script>
 
-    <!-- FIREBASE SDK v10 (FIRESTORE + AUTH) -->
+    <!-- FIREBASE SDK v10 (FIRESTORE) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { 
-            getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, 
-            signOut, onAuthStateChanged 
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { 
-            getFirestore, collection, query, where, getDocs, addDoc, 
-            doc, setDoc, getDoc, serverTimestamp 
+            getFirestore, collection, query, where, getDocs, addDoc, serverTimestamp 
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // CONFIG FIREBASE PTSSUSRAH
@@ -488,12 +441,12 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getFirestore(app);
 
-        const DASHBOARD_URL = "dashboard-naqib.html";
+        // DIRECT URL KE DASHBOARD GITHUB PAGES
+        const DASHBOARD_URL = "https://ikq363.github.io/PTSSUSRAH/dashboard-naqib.html";
 
-        // SEMAK SESSION - Redirect ke dashboard jika sudah login
+        // 1. SEMAKAN SESI
         (function checkExistingSession() {
             const savedUser = localStorage.getItem('naqibUser');
             if (savedUser) {
@@ -508,30 +461,14 @@
             }
         })();
 
-        // Juga semak melalui Firebase Auth
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                window.location.replace(DASHBOARD_URL);
-            }
-        });
-
         const withTimeout = (promiseFn, ms = 10000) => {
             return Promise.race([
                 promiseFn(),
                 new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error("Masa tamat. Semak sambungan internet/Firestore!")), ms)
+                    setTimeout(() => reject(new Error("Masa tamat. Semak sambungan internet/Rules Firestore!")), ms)
                 )
             ]);
         };
-
-        function showAlert(message, type = 'danger') {
-            const alertEl = document.getElementById('alertMessage');
-            alertEl.textContent = message;
-            alertEl.className = `alert alert-${type} show`;
-            setTimeout(() => {
-                alertEl.className = 'alert';
-            }, 5000);
-        }
 
         window.switchAuthTab = function(type) {
             const tabSignIn = document.getElementById('tabSignIn');
@@ -552,17 +489,7 @@
             }
         };
 
-        // Generate email dari no matrik
-        function generateEmail(noMatrik) {
-            return `${noMatrik.toLowerCase()}@ptss.edu.my`;
-        }
-
-        // Generate password default
-        function generatePassword(noMatrik) {
-            return `Ptss${noMatrik.slice(-4)}!`;
-        }
-
-        // PROSES SIGN UP
+        // PROSES SIGN UP (AUTO SET STATUS KE 'sah')
         document.getElementById('formSignUp').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btnSubmit = document.getElementById('btnSignUpSubmit');
@@ -575,68 +502,39 @@
             const kelas = document.getElementById('regKelas').value.trim().toUpperCase();
             const role = document.getElementById('regRole').value;
 
-            if (!nama || !noMatrik || !jabatan || !kelas) {
-                showAlert("Sila lengkapkan semua maklumat pendaftaran.", "danger");
-                btnSubmit.disabled = false;
-                btnSubmit.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Hantar Pendaftaran`;
-                return;
-            }
-
             try {
-                // Semak sama ada no matrik sudah wujud
                 const q = query(collection(db, "users"), where("noMatrik", "==", noMatrik));
                 const checkSnap = await withTimeout(() => getDocs(q));
 
                 if (!checkSnap.empty) {
-                    showAlert("No. Matrik ini telah berdaftar! Sila log masuk.", "danger");
-                    btnSubmit.disabled = false;
-                    btnSubmit.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Hantar Pendaftaran`;
+                    alert("No. Matrik ini telah berdaftar!");
                     return;
                 }
 
-                // Generate email dan password
-                const email = generateEmail(noMatrik);
-                const password = generatePassword(noMatrik);
-
-                // Create user in Firebase Auth
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-
-                // Simpan profil ke Firestore dengan user UID sebagai document ID
-                await setDoc(doc(db, "users", user.uid), {
+                await withTimeout(() => addDoc(collection(db, "users"), {
                     nama: nama,
                     noMatrik: noMatrik,
-                    email: email,
                     jabatan: jabatan,
                     kelas: kelas,
                     role: role,
                     sesi: "SESI 1 2026/2027",
                     status: "sah",
                     createdAt: serverTimestamp()
-                });
+                }));
 
-                showAlert(`Pendaftaran berjaya! Email: ${email}, Password: ${password}`, "success");
+                alert("Pendaftaran berjaya! Anda kini boleh terus log masuk.");
                 document.getElementById('formSignUp').reset();
-                
-                // Redirect ke dashboard selepas 2 saat
-                setTimeout(() => {
-                    window.location.replace(DASHBOARD_URL);
-                }, 2000);
+                switchAuthTab('signin');
 
             } catch (error) {
-                console.error("Registration error:", error);
-                if (error.code === 'auth/email-already-in-use') {
-                    showAlert("Email sudah digunakan. Sila log masuk atau guna no matrik lain.", "danger");
-                } else {
-                    showAlert("Gagal mendaftar: " + error.message, "danger");
-                }
+                alert("Gagal mendaftar: " + error.message);
             } finally {
                 btnSubmit.disabled = false;
                 btnSubmit.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Hantar Pendaftaran`;
             }
         });
 
-        // PROSES SIGN IN
+        // PROSES SIGN IN (ASAL ADA DALAM USERS = TRUS DISAHKAN & LOG MASUK)
         document.getElementById('formSignIn').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -644,30 +542,14 @@
             btnSubmit.disabled = true;
             btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Menyemak...`;
 
-            const inputNama = document.getElementById('loginNama').value.trim().toUpperCase();
             const inputMatrik = document.getElementById('loginMatrik').value.trim().toUpperCase();
 
-            if (!inputNama || !inputMatrik) {
-                showAlert("Sila masukkan nama dan no. matrik.", "danger");
-                btnSubmit.disabled = false;
-                btnSubmit.innerHTML = `<i class="fa-solid fa-arrow-right-to-bracket"></i> Log Masuk`;
-                return;
-            }
-
             try {
-                // Cari pengguna dalam Firestore
-                const q = query(
-                    collection(db, "users"), 
-                    where("noMatrik", "==", inputMatrik),
-                    where("nama", "==", inputNama)
-                );
-                
+                const q = query(collection(db, "users"), where("noMatrik", "==", inputMatrik));
                 const querySnapshot = await withTimeout(() => getDocs(q));
 
                 if (querySnapshot.empty) {
-                    showAlert(`Rekod tidak dijumpai untuk No. Matrik: ${inputMatrik}. Sila daftar akaun atau semak maklumat.`, "danger");
-                    btnSubmit.disabled = false;
-                    btnSubmit.innerHTML = `<i class="fa-solid fa-arrow-right-to-bracket"></i> Log Masuk`;
+                    alert(`Rekod tidak dijumpai bagi No. Matrik: ${inputMatrik}. Sila daftar akaun baharu.`);
                     return;
                 }
 
@@ -679,39 +561,21 @@
                     userId = docSnap.id;
                 });
 
-                // Semak status
-                if (userData.status !== 'sah') {
-                    showAlert(`Akaun anda status: ${userData.status}. Sila hubungi pentadbir.`, "danger");
-                    btnSubmit.disabled = false;
-                    btnSubmit.innerHTML = `<i class="fa-solid fa-arrow-right-to-bracket"></i> Log Masuk`;
-                    return;
-                }
+                // ASAL WUJUD DALAM USERS -> TERUS MASUK
+                localStorage.setItem('naqibUser', JSON.stringify({
+                    id: userId,
+                    nama: userData.nama,
+                    noMatrik: userData.noMatrik,
+                    role: userData.role,
+                    jabatan: userData.jabatan,
+                    kelas: userData.kelas
+                }));
 
-                // Login menggunakan Firebase Auth
-                const email = userData.email || generateEmail(inputMatrik);
-                const password = generatePassword(inputMatrik);
-                
-                try {
-                    await signInWithEmailAndPassword(auth, email, password);
-                    // Redirect akan berlaku melalui onAuthStateChanged
-                } catch (authError) {
-                    if (authError.code === 'auth/user-not-found') {
-                        // Jika user belum wujud dalam Auth, daftarkan dulu
-                        const newUserCred = await createUserWithEmailAndPassword(auth, email, password);
-                        // Update user profile
-                        await setDoc(doc(db, "users", newUserCred.user.uid), {
-                            ...userData,
-                            uid: newUserCred.user.uid
-                        }, { merge: true });
-                        // Redirect akan berlaku melalui onAuthStateChanged
-                    } else {
-                        throw authError;
-                    }
-                }
+                window.location.replace(DASHBOARD_URL);
 
             } catch (error) {
-                console.error("Login error:", error);
-                showAlert("Gagal log masuk: " + error.message, "danger");
+                console.error("Ralat Log Masuk:", error);
+                alert("Gagal log masuk: " + error.message);
             } finally {
                 btnSubmit.disabled = false;
                 btnSubmit.innerHTML = `<i class="fa-solid fa-arrow-right-to-bracket"></i> Log Masuk`;
