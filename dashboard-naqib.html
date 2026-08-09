@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Naqib - e-Usrah PTSS</title>
+    <!-- FontAwesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-gold: #d4af37;
+            --emerald-green: #059669;
+            --bg-dark: #0b1329;
+            --card-glass: rgba(15, 23, 42, 0.85);
+            --border-glass: rgba(212, 175, 55, 0.3);
+            --edit-color: #3b82f6;
+            --danger-color: #ef4444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(rgba(11, 19, 41, 0.92), rgba(6, 78, 59, 0.88)),
+                        url('https://images.unsplash.com/photo-1542816417-0983cbe82752?q=80&w=1920&auto=format&fit=crop') no-repeat center center/cover;
+            background-attachment: fixed;
+            color: #ffffff;
+            padding-bottom: 40px;
+        }
+
+        /* HEADER */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 5%;
+            background: rgba(11, 19, 41, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-glass);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-area { display: flex; align-items: center; gap: 12px; }
+        .logo-icon {
+            width: 45px; height: 45px;
+            background: linear-gradient(135deg, var(--emerald-green), #047857);
+            border-radius: 12px; display: flex; justify-content: center; align-items: center;
+            font-size: 22px; color: #fff;
+        }
+
+        .btn-logout {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid var(--danger-color);
+            color: #fca5a5;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        .btn-logout:hover { background: var(--danger-color); color: #fff; }
+
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+
+        /* MENU NAVIGASI PANTAS */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .menu-card {
+            background: var(--card-glass);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            text-decoration: none;
+            color: #fff;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .menu-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-gold);
+            background: rgba(15, 23, 42, 0.95);
+        }
+
+        .menu-icon {
+            width: 50px; height: 50px;
+            border-radius: 50%;
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--primary-gold);
+            display: flex; justify-content: center; align-items: center;
+            font-size: 20px;
+        }
+
+        /* PROFIL CARD */
+        .profile-card {
+            background: var(--card-glass);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            position: relative;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        .profile-avatar {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .avatar-circle {
+            width: 65px; height: 65px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-gold), #b38f2a);
+            display: flex; justify-content: center; align-items: center;
+            font-size: 28px; color: #0f172a; font-weight: bold;
+        }
+
+        .btn-edit-profile {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid var(--edit-color);
+            color: #93c5fd;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.3s;
+            display: flex; align-items: center; gap: 6px;
+        }
+
+        .btn-edit-profile:hover { background: var(--edit-color); color: #fff; }
+
+        /* PROFIL GRID DETAILS */
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .info-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 15px;
+            border-radius: 12px;
+        }
+
+        .info-item label {
+            font-size: 11px;
+            color: var(--primary-gold);
+            font-weight: 600;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .info-item p {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .badge-status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border: 1px solid #10b981;
+        }
+
+        /* MODAL POPUP EDIT PROFIL */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px);
+            display: none; justify-content: center; align-items: center; z-index: 999;
+        }
+
+        .modal-card {
+            background: #0f172a; border: 1px solid var(--border-glass); border-radius: 20px;
+            width: 90%; max-width: 500px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        }
+
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 20px;
+        }
+
+        .modal-header h3 { font-size: 16px; color: var(--primary-gold); }
+        .close-btn { background: transparent; border: none; color: #94a3b8; font-size: 18px; cursor: pointer; }
+
+        .input-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 15px; }
+        .input-group label { font-size: 11px; color: var(--primary-gold); font-weight: 600; text-transform: uppercase; }
+        .form-control {
+            width: 100%; padding: 10px 14px; background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; color: #fff; font-size: 13px; outline: none;
+        }
+
+        .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .btn-save { background: var(--emerald-green); color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 600; cursor: pointer; }
+        .btn-cancel { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 10px 18px; border-radius: 10px; font-weight: 600; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <div class="logo-area">
+            <div class="logo-icon"><i class="fa-solid fa-user-tie"></i></div>
+            <div>
+                <h2 style="font-size: 18px;">Dashboard Naqib</h2>
+                <p style="font-size: 11px; color: var(--primary-gold);">e-Usrah PTSS</p>
+            </div>
+        </div>
+        <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Log Keluar</button>
+    </header>
+
+    <div class="container">
+        
+        <!-- MENU UTAMA -->
+        <div class="menu-grid">
+            <!-- MENU AHLI USRAH -->
+            <a href="senarai-ahli.html" class="menu-card">
+                <div class="menu-icon"><i class="fa-solid fa-users"></i></div>
+                <h3 style="font-size: 15px;">Ahli Usrah</h3>
+                <p style="font-size: 11px; color: #94a3b8;">Lihat dan urus ahli di bawah naungan</p>
+            </a>
+
+            <!-- MENU PENDAFTARAN USRAH -->
+            <a href="pendaftaran-usrah.html" class="menu-card">
+                <div class="menu-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+                <h3 style="font-size: 15px;">Pendaftaran Usrah</h3>
+                <p style="font-size: 11px; color: #94a3b8;">Daftar sesi baharu atau kehadiran</p>
+            </a>
+        </div>
+
+        <!-- SEKSYEN PROFIL NAQIB -->
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <div class="avatar-circle" id="avatarInitial">N</div>
+                    <div>
+                        <h3 id="displayNamaHeader" style="font-size: 18px;">Memuatkan...</h3>
+                        <span class="badge-status" id="displayStatus">Active</span>
+                    </div>
+                </div>
+                <button class="btn-edit-profile" onclick="openEditProfileModal()">
+                    <i class="fa-solid fa-user-pen"></i> Kemas Kini Profil
+                </button>
+            </div>
+
+            <!-- BUTIRAN PROFIL -->
+            <div class="profile-grid">
+                <div class="info-item">
+                    <label>Nama Penuh</label>
+                    <p id="displayNama">-</p>
+                </div>
+                <div class="info-item">
+                    <label>No. ID / Staf / Matrik</label>
+                    <p id="displayID">-</p>
+                </div>
+                <div class="info-item">
+                    <label>E-mel</label>
+                    <p id="displayEmail">-</p>
+                </div>
+                <div class="info-item">
+                    <label>No. Telefon</label>
+                    <p id="displayPhone">-</p>
+                </div>
+                <div class="info-item">
+                    <label>Jabatan</label>
+                    <p id="displayJabatan">-</p>
+                </div>
+                <div class="info-item">
+                    <label>Jantina</label>
+                    <p id="displayJantina">-</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL POPUP EDIT PROFIL -->
+    <div id="editProfileModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-gear"></i> Kemas Kini Profil Saya</h3>
+                <button class="close-btn" onclick="closeEditProfileModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="editProfileForm">
+                <div class="input-group">
+                    <label>Nama Penuh</label>
+                    <input type="text" id="editNama" class="form-control" required>
+                </div>
+                <div class="input-group">
+                    <label>No. Telefon</label>
+                    <input type="text" id="editPhone" class="form-control" placeholder="Contoh: 0123456789" required>
+                </div>
+                <div class="input-group">
+                    <label>Jabatan</label>
+                    <select id="editJabatan" class="form-control" required>
+                        <option value="JTMK">JTMK</option>
+                        <option value="JKE">JKE</option>
+                        <option value="JKM">JKM</option>
+                        <option value="JP">JP</option>
+                        <option value="JPH">JPH</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Jantina</label>
+                    <select id="editJantina" class="form-control" required>
+                        <option value="LELAKI">LELAKI</option>
+                        <option value="PEREMPUAN">PEREMPUAN</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeEditProfileModal()">Batal</button>
+                    <button type="submit" class="btn-save" id="btnSaveProfile"><i class="fa-solid fa-floppy-disk"></i> Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- FIREBASE SDK v10 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDZWnQZou365jx6NtOFAWN_uNkZ3ppRvl0",
+            authDomain: "ptssusrah.firebaseapp.com",
+            projectId: "ptssusrah",
+            storageBucket: "ptssusrah.firebasestorage.app",
+            messagingSenderId: "859008504533",
+            appId: "1:859008504533:web:51d6ccdbf3b4e090aec85c",
+            measurementId: "G-D185J3E844"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUserId = null;
+
+        // SEMAK LOG MASUK PENGGUNA
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUserId = user.uid;
+                loadUserProfile(currentUserId, user.email);
+            } else {
+                // Jika belum login, hantar balik ke login page
+                window.location.href = "login.html";
+            }
+        });
+
+        // AMBIL DATA PROFIL NAQIB DARI KOLEKSI "users"
+        async function loadUserProfile(uid, email) {
+            try {
+                const userDoc = await getDoc(doc(db, "users", uid));
+                
+                if (userDoc.exists()) {
+                    const data = userDoc.data();
+                    const nama = data.nama || data.fullname || "Pengguna Naqib";
+                    const noID = data.noID || data.noMatrik || "-";
+                    const phone = data.phone || data.noTel || "-";
+                    const jabatan = data.jabatan || "JTMK";
+                    const jantina = (data.jantina || "LELAKI").toUpperCase();
+                    const status = data.status || "Disahkan";
+
+                    // ISI PAPARAN PROFIL
+                    document.getElementById('displayNamaHeader').innerText = nama;
+                    document.getElementById('displayNama').innerText = nama;
+                    document.getElementById('displayID').innerText = noID;
+                    document.getElementById('displayEmail').innerText = email || "-";
+                    document.getElementById('displayPhone').innerText = phone;
+                    document.getElementById('displayJabatan').innerText = jabatan;
+                    document.getElementById('displayJantina').innerText = jantina;
+                    document.getElementById('displayStatus').innerText = status;
+                    document.getElementById('avatarInitial').innerText = nama.charAt(0).toUpperCase();
+
+                    // PRE-FILL POPUP FORM
+                    document.getElementById('editNama').value = nama;
+                    document.getElementById('editPhone').value = phone !== "-" ? phone : "";
+                    document.getElementById('editJabatan').value = jabatan;
+                    document.getElementById('editJantina').value = jantina;
+
+                } else {
+                    console.log("Rekod profil tidak dijumpai.");
+                }
+            } catch (error) {
+                console.error("Ralat memuatkan profil:", error);
+            }
+        }
+
+        // BUKA & TUTUP MODAL
+        window.openEditProfileModal = function() {
+            document.getElementById('editProfileModal').style.display = 'flex';
+        };
+
+        window.closeEditProfileModal = function() {
+            document.getElementById('editProfileModal').style.display = 'none';
+        };
+
+        // SIMPAN KEMAS KINI PROFIL KE FIRESTORE
+        document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUserId) return;
+
+            const btnSave = document.getElementById('btnSaveProfile');
+            btnSave.disabled = true;
+            btnSave.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...`;
+
+            const updatedData = {
+                nama: document.getElementById('editNama').value.trim().toUpperCase(),
+                phone: document.getElementById('editPhone').value.trim(),
+                jabatan: document.getElementById('editJabatan').value,
+                jantina: document.getElementById('editJantina').value,
+                updatedAt: new Date()
+            };
+
+            try {
+                const docRef = doc(db, "users", currentUserId);
+                await updateDoc(docRef, updatedData);
+
+                alert("Profil berjaya dikemas kini!");
+                closeEditProfileModal();
+                loadUserProfile(currentUserId, auth.currentUser.email);
+
+            } catch (error) {
+                console.error("Ralat mengemas kini profil:", error);
+                alert("Gagal mengemas kini: " + error.message);
+            } finally {
+                btnSave.disabled = false;
+                btnSave.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Simpan`;
+            }
+        });
+
+        // LOG KELUAR
+        window.logout = function() {
+            if (confirm("Adakah anda pasti ingin log keluar?")) {
+                signOut(auth).then(() => {
+                    window.location.href = "login.html";
+                });
+            }
+        };
+    </script>
+</body>
+</html>
