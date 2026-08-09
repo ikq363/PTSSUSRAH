@@ -3,126 +3,309 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Usrah PTSS - Log Masuk / Daftar Naqib</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
+    <title>Senarai Naqib - e-Usrah PTSS</title>
+    <!-- FontAwesome & Google Fonts -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
+        :root {
+            --primary-gold: #d4af37;
+            --emerald-green: #059669;
+            --bg-dark: #0b1329;
+            --card-glass: rgba(15, 23, 42, 0.85);
+            --border-glass: rgba(212, 175, 55, 0.3);
+            --danger-color: #ef4444;
+            --edit-color: #3b82f6;
+            --warning-color: #f59e0b;
+            --approve-color: #10b981;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+            min-height: 100vh;
+            background: linear-gradient(rgba(11, 19, 41, 0.92), rgba(6, 78, 59, 0.88)),
+                        url('https://images.unsplash.com/photo-1542816417-0983cbe82752?q=80&w=1920&auto=format&fit=crop') no-repeat center center/cover;
+            background-attachment: fixed;
+            color: #ffffff;
+            padding-bottom: 40px;
         }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 5%;
+            background: rgba(11, 19, 41, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-glass);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo-area { display: flex; align-items: center; gap: 12px; }
+        .logo-icon {
+            width: 45px; height: 45px;
+            background: linear-gradient(135deg, var(--emerald-green), #047857);
+            border-radius: 12px; display: flex; justify-content: center; align-items: center;
+            font-size: 22px; color: #fff;
+        }
+
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+
+        .filter-card {
+            background: var(--card-glass);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        /* GENDER TABS */
+        .gender-tabs {
+            display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;
+        }
+
+        .tab-btn {
+            padding: 10px 20px; border: 1px solid var(--border-glass); background: rgba(255,255,255,0.05);
+            color: #cbd5e1; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 13px;
+            transition: all 0.3s; display: flex; align-items: center; gap: 8px;
+        }
+
         .tab-btn.active {
-            border-bottom: 3px solid #2563eb;
-            color: #2563eb;
-            font-weight: 600;
+            background: linear-gradient(135deg, var(--emerald-green), #047857); color: #fff; border-color: transparent;
         }
-        .form-content {
-            display: none;
+
+        /* FILTERS GRID */
+        .filter-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;
         }
-        .form-content.active {
-            display: block;
+
+        .input-group { position: relative; display: flex; flex-direction: column; gap: 6px; }
+        .input-group label { font-size: 11px; color: var(--primary-gold); font-weight: 600; text-transform: uppercase; }
+
+        .form-control {
+            width: 100%; padding: 10px 14px; background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; color: #fff;
+            font-size: 13px; outline: none; text-transform: uppercase;
         }
+
+        select.form-control option { background: #0f172a; color: #fff; }
+
+        /* AUTO SUGGESTION BOX */
+        .suggestions-box {
+            position: absolute; top: 100%; left: 0; right: 0; background: #0f172a;
+            border: 1px solid var(--border-glass); border-radius: 10px; max-height: 180px;
+            overflow-y: auto; z-index: 50; display: none; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+
+        .suggestion-item {
+            padding: 10px 14px; cursor: pointer; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .suggestion-item:hover { background: rgba(212, 175, 55, 0.2); }
+
+        /* TABLE STYLES */
+        .table-card {
+            background: var(--card-glass); backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass); border-radius: 20px; overflow: hidden;
+        }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+        th { background: rgba(5, 150, 105, 0.3); color: var(--primary-gold); padding: 14px; font-weight: 600; text-transform: uppercase; }
+        td { padding: 12px 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); vertical-align: middle; }
+        tr:hover { background: rgba(255, 255, 255, 0.03); }
+
+        .badge-jantina {
+            padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; display: inline-block;
+        }
+        .bg-lelaki { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6; }
+        .bg-perempuan { background: rgba(236, 72, 153, 0.2); color: #f472b6; border: 1px solid #ec4899; }
+
+        .badge-status {
+            padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; display: inline-block;
+        }
+        .status-approved { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; }
+        .status-pending { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
+
+        /* ACTION BUTTONS */
+        .action-btns { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        .btn-action {
+            border: none; padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; color: #fff;
+        }
+        .btn-approve { background: var(--approve-color); }
+        .btn-approve:hover { background: #059669; }
+        .btn-edit { background: var(--edit-color); }
+        .btn-edit:hover { background: #2563eb; }
+        .btn-delete { background: var(--danger-color); }
+        .btn-delete:hover { background: #dc2626; }
+
+        /* MODAL WINDOW POPUP */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px);
+            display: none; justify-content: center; align-items: center; z-index: 999;
+        }
+        .modal-card {
+            background: #0f172a; border: 1px solid var(--border-glass); border-radius: 20px;
+            width: 90%; max-width: 500px; padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            position: relative; animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px;
+        }
+        .modal-header h3 { font-size: 16px; color: var(--primary-gold); }
+        .close-btn { background: transparent; border: none; color: #94a3b8; font-size: 18px; cursor: pointer; }
+        .close-btn:hover { color: #fff; }
+        .modal-body { display: flex; flex-direction: column; gap: 15px; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .btn-save { background: var(--emerald-green); color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 600; cursor: pointer; }
+        .btn-save:hover { background: #047857; }
+        .btn-cancel { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 10px 18px; border-radius: 10px; font-weight: 600; cursor: pointer; }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body>
 
-    <div class="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
-        
-        <!-- Header -->
-        <div class="bg-gradient-to-r from-blue-700 to-indigo-800 p-6 text-center text-white">
-            <i class="fa-solid fa-users-rectangle text-4xl mb-2"></i>
-            <h1 class="text-2xl font-bold">PORTAL NAQIB / NAQIBAH</h1>
-            <p class="text-xs text-blue-200 mt-1">Sistem Pengurusan Usrah PTSS</p>
+    <header>
+        <div class="logo-area">
+            <div class="logo-icon"><i class="fa-solid fa-user-tie"></i></div>
+            <div>
+                <h2 style="font-size: 18px;">Senarai Naqib Berdaftar</h2>
+                <p style="font-size: 11px; color: var(--primary-gold);">e-Usrah PTSS (Koleksi Users)</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="filter-card">
+            <!-- TAB JANTINA -->
+            <div class="gender-tabs">
+                <button class="tab-btn active" onclick="setGenderFilter('SEMUA', this)"><i class="fa-solid fa-users"></i> Semua Naqib</button>
+                <button class="tab-btn" onclick="setGenderFilter('LELAKI', this)"><i class="fa-solid fa-mars"></i> Naqib (Lelaki)</button>
+                <button class="tab-btn" onclick="setGenderFilter('PEREMPUAN', this)"><i class="fa-solid fa-venus"></i> Naqibah (Perempuan)</button>
+            </div>
+
+            <!-- FILTERS GRID -->
+            <div class="filter-grid">
+                <!-- CARIAN AUTOMATIK -->
+                <div class="input-group">
+                    <label>Cari Nama / No. Staf / No. Matrik</label>
+                    <input type="text" id="searchInput" class="form-control" placeholder="Mula menaip..." autocomplete="off">
+                    <div id="suggestions" class="suggestions-box"></div>
+                </div>
+
+                <!-- JABATAN -->
+                <div class="input-group">
+                    <label>Jabatan</label>
+                    <select id="filterJabatan" class="form-control" onchange="applyFilters()">
+                        <option value="SEMUA">-- SEMUA JABATAN --</option>
+                        <option value="JTMK">JTMK</option>
+                        <option value="JKE">JKE</option>
+                        <option value="JKM">JKM</option>
+                        <option value="JP">JP</option>
+                        <option value="JPH">JPH</option>
+                    </select>
+                </div>
+
+                <!-- STATUS KELULUSAN -->
+                <div class="input-group">
+                    <label>Status Kelulusan</label>
+                    <select id="filterStatus" class="form-control" onchange="applyFilters()">
+                        <option value="SEMUA">-- SEMUA STATUS --</option>
+                        <option value="Disahkan">Disahkan</option>
+                        <option value="Menunggu">Menunggu</option>
+                    </select>
+                </div>
+            </div>
         </div>
 
-        <!-- Tab Navigation -->
-        <div class="flex border-b border-gray-200">
-            <button id="tabSignIn" onclick="switchAuthTab('signin')" class="tab-btn active w-1/2 py-3 text-center text-sm text-gray-500 hover:text-blue-600 transition">
-                <i class="fa-solid fa-right-to-bracket mr-1"></i> Log Masuk
-            </button>
-            <button id="tabSignUp" onclick="switchAuthTab('signup')" class="tab-btn w-1/2 py-3 text-center text-sm text-gray-500 hover:text-blue-600 transition">
-                <i class="fa-solid fa-user-plus mr-1"></i> Daftar Akaun
-            </button>
+        <!-- JADUAL SENARAI NAQIB -->
+        <div class="table-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nama Penuh</th>
+                        <th>No. ID / Matrik</th>
+                        <th>Jabatan</th>
+                        <th>Jantina</th>
+                        <th>Status</th>
+                        <th>Tindakan</th>
+                    </tr>
+                </thead>
+                <tbody id="naqibTableBody">
+                    <tr><td colspan="7" style="text-align: center; color: #94a3b8;">Memuatkan data dari koleksi users...</td></tr>
+                </tbody>
+            </table>
         </div>
+    </div>
 
-        <div class="p-6">
-            
-            <!-- FORM 1: LOG MASUK -->
-            <form id="formSignIn" class="form-content active space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Nama Penuh</label>
-                    <input type="text" id="loginNama" required class="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none uppercase" placeholder="Contoh: MUHAMMAD ALI">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">No. Matrik</label>
-                    <input type="text" id="loginMatrik" required class="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none uppercase" placeholder="Contoh: 18DDT21F1001">
-                </div>
-
-                <button type="submit" id="btnSignInSubmit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg shadow-md transition flex items-center justify-center gap-2 text-sm">
-                    <i class="fa-solid fa-arrow-right-to-bracket"></i> Log Masuk
-                </button>
-            </form>
-
-            <!-- FORM 2: PENDAFTARAN -->
-            <form id="formSignUp" class="form-content space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Nama Penuh</label>
-                    <input type="text" id="regNama" required class="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none uppercase" placeholder="Nama mengikut kad pengenalan">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">No. Matrik</label>
-                    <input type="text" id="regMatrik" required class="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none uppercase" placeholder="Contoh: 18DDT21F1001">
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Jabatan</label>
-                        <select id="regJabatan" required class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                            <option value="">Pilih Jabatan</option>
+    <!-- MODAL EDIT WINDOW POPUP -->
+    <div id="editModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-pen"></i> Kemas Kini Maklumat Naqib</h3>
+                <button class="close-btn" onclick="closeEditModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="editNaqibForm">
+                <input type="hidden" id="editDocId">
+                <div class="modal-body">
+                    <div class="input-group">
+                        <label>Nama Penuh</label>
+                        <input type="text" id="editNama" class="form-control" required>
+                    </div>
+                    <div class="input-group">
+                        <label>No. ID / No. Matrik</label>
+                        <input type="text" id="editID" class="form-control" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Jabatan</label>
+                        <select id="editJabatan" class="form-control" required>
                             <option value="JTMK">JTMK</option>
                             <option value="JKE">JKE</option>
                             <option value="JKM">JKM</option>
                             <option value="JP">JP</option>
-                            <option value="JRKV">JRKV</option>
+                            <option value="JPH">JPH</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Kelas</label>
-                        <input type="text" id="regKelas" required class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none uppercase" placeholder="DDT5A">
+                    <div class="input-group">
+                        <label>Jantina</label>
+                        <select id="editJantina" class="form-control" required>
+                            <option value="LELAKI">LELAKI</option>
+                            <option value="PEREMPUAN">PEREMPUAN</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Status Kelulusan Admin</label>
+                        <select id="editStatus" class="form-control" required>
+                            <option value="Disahkan">Disahkan (Boleh Login)</option>
+                            <option value="Menunggu">Menunggu (Kelulusan)</option>
+                        </select>
                     </div>
                 </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Peranan Usrah</label>
-                    <select id="regRole" required class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option value="Naqib">Naqib (Lelaki)</option>
-                        <option value="Naqibah">Naqibah (Perempuan)</option>
-                    </select>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeEditModal()">Batal</button>
+                    <button type="submit" class="btn-save" id="btnSaveEdit"><i class="fa-solid fa-floppy-disk"></i> Simpan</button>
                 </div>
-
-                <button type="submit" id="btnSignUpSubmit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg shadow-md transition flex items-center justify-center gap-2 text-sm">
-                    <i class="fa-solid fa-paper-plane"></i> Hantar Pendaftaran
-                </button>
             </form>
-
         </div>
     </div>
 
-    <!-- FIREBASE SDK v10 (FIRESTORE) -->
+    <!-- FIREBASE SDK v10 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { 
-            getFirestore, collection, query, where, getDocs, addDoc, serverTimestamp 
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Konfigurasi Firebase PTSSUSRAH
+        // ✅ KONFIGURASI FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyDZWnQZou365jx6NtOFAWN_uNkZ3ppRvl0",
             authDomain: "ptssusrah.firebaseapp.com",
@@ -136,162 +319,240 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Relative path untuk memastikan pautan berfungsi secara lokal & server
-        const DASHBOARD_URL = "./dashboard-naqib.html";
+        let allNaqib = [];
+        let currentGender = "SEMUA";
 
-        // 1. SEMAKAN SESI (Auto-Redirect jika akaun sudah sedia log masuk)
-        (function checkExistingSession() {
-            const savedUser = localStorage.getItem('naqibUser');
-            if (savedUser) {
-                try {
-                    const user = JSON.parse(savedUser);
-                    if (user && user.id && user.noMatrik) {
-                        window.location.replace(DASHBOARD_URL);
+        // BACA DATA DARI KOLEKSI "users"
+        async function loadNaqib() {
+            try {
+                // Ambil semua pengguna dari koleksi 'users'
+                const querySnapshot = await getDocs(collection(db, "users"));
+                allNaqib = [];
+
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    
+                    // Tapis hanya akaun yang mempunyai role/peranan Naqib (atau ambil semua jika peranan diset sebagai Naqib)
+                    const userRole = (data.role || data.peranan || '').toLowerCase();
+                    if (userRole === 'naqib' || userRole === 'naqibah' || !data.role) {
+                        allNaqib.push({
+                            id: docSnap.id,
+                            nama: data.nama || data.fullname || data.name || '-',
+                            noID: data.noID || data.noMatrik || data.icNumber || '-',
+                            jabatan: data.jabatan || data.department || '-',
+                            jantina: (data.jantina || data.gender || 'LELAKI').toUpperCase(),
+                            status: data.status || 'Menunggu',
+                            role: data.role || 'naqib'
+                        });
                     }
-                } catch (e) {
-                    localStorage.removeItem('naqibUser');
-                }
-            }
-        })();
-
-        // Fungsi Helper Timeout
-        const withTimeout = (promiseFn, ms = 10000) => {
-            return Promise.race([
-                promiseFn(),
-                new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error("Masa tamat. Semak rangkaian atau kebenaran Firestore Rules!")), ms)
-                )
-            ]);
-        };
-
-        // Fungsi Tukar Tab Form
-        window.switchAuthTab = function(type) {
-            const tabSignIn = document.getElementById('tabSignIn');
-            const tabSignUp = document.getElementById('tabSignUp');
-            const formSignIn = document.getElementById('formSignIn');
-            const formSignUp = document.getElementById('formSignUp');
-
-            if (type === 'signin') {
-                tabSignIn.classList.add('active');
-                tabSignUp.classList.remove('active');
-                formSignIn.classList.add('active');
-                formSignUp.classList.remove('active');
-            } else {
-                tabSignUp.classList.add('active');
-                tabSignIn.classList.remove('active');
-                formSignUp.classList.add('active');
-                formSignIn.classList.remove('active');
-            }
-        };
-
-        // 2. PROSES DAFTAR AKAUN (SIGN UP)
-        document.getElementById('formSignUp').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btnSubmit = document.getElementById('btnSignUpSubmit');
-            btnSubmit.disabled = true;
-            btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Memproses...`;
-
-            const nama = document.getElementById('regNama').value.trim().toUpperCase();
-            const noMatrik = document.getElementById('regMatrik').value.trim().toUpperCase();
-            const jabatan = document.getElementById('regJabatan').value;
-            const kelas = document.getElementById('regKelas').value.trim().toUpperCase();
-            const role = document.getElementById('regRole').value;
-
-            try {
-                // Semak jika No. Matrik sudah wujud
-                const q = query(collection(db, "users"), where("noMatrik", "==", noMatrik));
-                const checkSnap = await withTimeout(() => getDocs(q));
-
-                if (!checkSnap.empty) {
-                    alert("No. Matrik ini telah berdaftar! Sila log masuk.");
-                    switchAuthTab('signin');
-                    return;
-                }
-
-                // Tambah pengguna baharu ke Firestore
-                const docRef = await withTimeout(() => addDoc(collection(db, "users"), {
-                    nama: nama,
-                    noMatrik: noMatrik,
-                    jabatan: jabatan,
-                    kelas: kelas,
-                    role: role,
-                    sesi: "SESI 1 2026/2027",
-                    status: "sah",
-                    createdAt: serverTimestamp()
-                }));
-
-                // Simpan maklumat pengguna ke LocalStorage
-                localStorage.setItem('naqibUser', JSON.stringify({
-                    id: docRef.id,
-                    nama: nama,
-                    noMatrik: noMatrik,
-                    role: role,
-                    jabatan: jabatan,
-                    kelas: kelas
-                }));
-
-                alert("Pendaftaran berjaya! Mengalih ke Dashboard...");
-                window.location.replace(DASHBOARD_URL);
-
-            } catch (error) {
-                alert("Gagal mendaftar: " + error.message);
-            } finally {
-                btnSubmit.disabled = false;
-                btnSubmit.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Hantar Pendaftaran`;
-            }
-        });
-
-        // 3. PROSES LOG MASUK (SIGN IN)
-        document.getElementById('formSignIn').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const btnSubmit = document.getElementById('btnSignInSubmit');
-            btnSubmit.disabled = true;
-            btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Menyemak...`;
-
-            const inputNama = document.getElementById('loginNama').value.trim().toUpperCase();
-            const inputMatrik = document.getElementById('loginMatrik').value.trim().toUpperCase();
-
-            try {
-                // Cari data pengguna mengikut No. Matrik
-                const q = query(collection(db, "users"), where("noMatrik", "==", inputMatrik));
-                const querySnapshot = await withTimeout(() => getDocs(q));
-
-                if (querySnapshot.empty) {
-                    alert(`Rekod tidak dijumpai bagi No. Matrik: ${inputMatrik}. Sila daftar akaun dahulu.`);
-                    switchAuthTab('signup');
-                    return;
-                }
-
-                let userData = null;
-                let userId = null;
-
-                querySnapshot.forEach(docSnap => {
-                    userData = docSnap.data();
-                    userId = docSnap.id;
                 });
 
-                // Simpan ke LocalStorage
-                localStorage.setItem('naqibUser', JSON.stringify({
-                    id: userId,
-                    nama: userData.nama || inputNama,
-                    noMatrik: userData.noMatrik,
-                    role: userData.role || "Naqib",
-                    jabatan: userData.jabatan || "-",
-                    kelas: userData.kelas || "-"
-                }));
-
-                // Direct ke Dashboard
-                window.location.replace(DASHBOARD_URL);
+                applyFilters();
 
             } catch (error) {
-                console.error("Ralat Log Masuk:", error);
-                alert("Gagal log masuk: " + error.message);
+                console.error("Ralat memuatkan data dari users:", error);
+            }
+        }
+
+        window.setGenderFilter = function(gender, btnElement) {
+            currentGender = gender;
+            document.querySelectorAll('.gender-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+            applyFilters();
+        };
+
+        window.applyFilters = function() {
+            const searchVal = document.getElementById('searchInput').value.trim().toUpperCase();
+            const jabatanVal = document.getElementById('filterJabatan').value;
+            const statusVal = document.getElementById('filterStatus').value;
+
+            const filtered = allNaqib.filter(naqib => {
+                const matchGender = currentGender === "SEMUA" || naqib.jantina === currentGender;
+                const matchJabatan = jabatanVal === "SEMUA" || naqib.jabatan === jabatanVal;
+                const matchStatus = statusVal === "SEMUA" || (naqib.status || "Menunggu") === statusVal;
+                
+                const idMatrik = naqib.noID || '';
+                const matchSearch = !searchVal || 
+                    (naqib.nama && naqib.nama.toUpperCase().includes(searchVal)) || 
+                    (idMatrik && idMatrik.toUpperCase().includes(searchVal));
+
+                return matchGender && matchJabatan && matchStatus && matchSearch;
+            });
+
+            renderTable(filtered);
+        };
+
+        function renderTable(data) {
+            const tbody = document.getElementById('naqibTableBody');
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #94a3b8;">Tiada rekod Naqib dijumpai dalam koleksi users.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map((item, index) => {
+                const statusStr = item.status || "Menunggu";
+                const isApproved = statusStr === "Disahkan" || statusStr === "Approved";
+
+                return `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td style="font-weight: 600; color: var(--primary-gold);">${item.nama || '-'}</td>
+                    <td>${item.noID || '-'}</td>
+                    <td>${item.jabatan || '-'}</td>
+                    <td>
+                        <span class="badge-jantina ${item.jantina === 'LELAKI' ? 'bg-lelaki' : 'bg-perempuan'}">
+                            ${item.jantina || '-'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge-status ${isApproved ? 'status-approved' : 'status-pending'}">
+                            <i class="fa-solid ${isApproved ? 'fa-circle-check' : 'fa-clock'}"></i> ${statusStr}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-btns">
+                            ${!isApproved ? `
+                            <button class="btn-action btn-approve" onclick="approveNaqib('${item.id}', '${item.nama}')">
+                                <i class="fa-solid fa-check"></i> Luluskan
+                            </button>
+                            ` : ''}
+                            <button class="btn-action btn-edit" onclick="openEditModal('${item.id}')">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                            </button>
+                            <button class="btn-action btn-delete" onclick="deleteNaqib('${item.id}', '${item.nama}')">
+                                <i class="fa-solid fa-trash-can"></i> Padam
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        // ✅ LULUSKAN NAQIB DI KOLEKSI "users"
+        window.approveNaqib = async function(docId, nama) {
+            if (confirm(`Adakah anda pasti ingin meluluskan pendaftaran Naqib ${nama}?`)) {
+                try {
+                    const docRef = doc(db, "users", docId);
+                    await updateDoc(docRef, { status: "Disahkan" });
+                    alert(`Naqib ${nama} telah berjaya disahkan!`);
+                    loadNaqib();
+                } catch (error) {
+                    console.error("Ralat meluluskan Naqib:", error);
+                    alert("Gagal meluluskan: " + error.message);
+                }
+            }
+        };
+
+        // BUKA MODAL EDIT
+        window.openEditModal = function(docId) {
+            const naqib = allNaqib.find(n => n.id === docId);
+            if (!naqib) return;
+
+            document.getElementById('editDocId').value = docId;
+            document.getElementById('editNama').value = naqib.nama || '';
+            document.getElementById('editID').value = naqib.noID || '';
+            document.getElementById('editJabatan').value = naqib.jabatan || 'JTMK';
+            document.getElementById('editJantina').value = naqib.jantina || 'LELAKI';
+            document.getElementById('editStatus').value = naqib.status || 'Menunggu';
+
+            document.getElementById('editModal').style.display = 'flex';
+        };
+
+        // TUTUP MODAL EDIT
+        window.closeEditModal = function() {
+            document.getElementById('editModal').style.display = 'none';
+        };
+
+        // SIMPAN KEMAS KINI KE KOLEKSI "users"
+        document.getElementById('editNaqibForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const docId = document.getElementById('editDocId').value;
+            const btnSave = document.getElementById('btnSaveEdit');
+            btnSave.disabled = true;
+            btnSave.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...`;
+
+            const updatedData = {
+                nama: document.getElementById('editNama').value.trim().toUpperCase(),
+                noID: document.getElementById('editID').value.trim().toUpperCase(),
+                jabatan: document.getElementById('editJabatan').value,
+                jantina: document.getElementById('editJantina').value,
+                status: document.getElementById('editStatus').value
+            };
+
+            try {
+                const docRef = doc(db, "users", docId);
+                await updateDoc(docRef, updatedData);
+
+                alert("Maklumat pengguna berjaya dikemas kini!");
+                closeEditModal();
+                loadNaqib();
+
+            } catch (error) {
+                console.error("Ralat mengemas kini:", error);
+                alert("Gagal mengemas kini: " + error.message);
             } finally {
-                btnSubmit.disabled = false;
-                btnSubmit.innerHTML = `<i class="fa-solid fa-arrow-right-to-bracket"></i> Log Masuk`;
+                btnSave.disabled = false;
+                btnSave.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Simpan`;
             }
         });
+
+        // PADAM NAQIB DARI KOLEKSI "users"
+        window.deleteNaqib = async function(docId, nama) {
+            if (confirm(`Adakah anda pasti ingin memadam rekod Naqib ${nama}?`)) {
+                try {
+                    await deleteDoc(doc(db, "users", docId));
+                    alert("Rekod pengguna berjaya dipadam!");
+                    loadNaqib();
+                } catch (error) {
+                    console.error("Ralat memadam:", error);
+                    alert("Gagal memadam rekod: " + error.message);
+                }
+            }
+        };
+
+        const searchInput = document.getElementById('searchInput');
+        const suggestionsBox = document.getElementById('suggestions');
+
+        searchInput.addEventListener('input', function() {
+            const val = this.value.trim().toUpperCase();
+            applyFilters();
+
+            if (!val) {
+                suggestionsBox.style.display = 'none';
+                return;
+            }
+
+            const matches = allNaqib.filter(n => {
+                const idMatrik = n.noID || '';
+                return (n.nama && n.nama.toUpperCase().includes(val)) || (idMatrik && idMatrik.toUpperCase().includes(val));
+            }).slice(0, 5);
+
+            if (matches.length > 0) {
+                suggestionsBox.innerHTML = matches.map(n => `
+                    <div class="suggestion-item" onclick="selectSuggestion('${n.nama}')">
+                        <strong>${n.nama}</strong> (${n.noID})
+                    </div>
+                `).join('');
+                suggestionsBox.style.display = 'block';
+            } else {
+                suggestionsBox.style.display = 'none';
+            }
+        });
+
+        window.selectSuggestion = function(nama) {
+            searchInput.value = nama;
+            suggestionsBox.style.display = 'none';
+            applyFilters();
+        };
+
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+                suggestionsBox.style.display = 'none';
+            }
+        });
+
+        loadNaqib();
     </script>
 </body>
 </html>
